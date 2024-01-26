@@ -15,7 +15,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
-    icon: path.join(__dirname, "assets", "logo.png"),
+    icon: path.join(__dirname, "assets", "icon.png"),
     webPreferences: {
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
@@ -43,7 +43,7 @@ function createWindow() {
   });
 
   // Create a new tray
-  tray = new Tray(path.join(__dirname, "assets", isMac ? "maclogo@2x.png" : "logo.png"));
+  tray = new Tray(path.join(__dirname, "assets", isMac ? "macTrayIcon@2x.png" : "icon.png"));
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Toggle Window",
