@@ -21,7 +21,7 @@ function createWindow() {
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, "preload.js"), // use a preload script
-      devTools: false, // disable developer tools
+      devTools: process.env.NODE_ENV !== 'production', // disable developer tools
     },
   });
 
@@ -29,7 +29,12 @@ function createWindow() {
   win.loadURL("https://steamcommunity.com/chat");
 
   // Remove the default Electron menu
-  Menu.setApplicationMenu(null)
+  if (process.env.NODE_ENV === 'production') {
+    Menu.setApplicationMenu(null);
+    win.webContents.on('devtools-opened', () => {
+      win.webContents.closeDevTools();
+    });
+  }
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     // In this case, don't create a new window...
