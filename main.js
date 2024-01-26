@@ -7,6 +7,7 @@ const {
   Menu,
 } = require("electron");
 const path = require("path");
+const isMac = process.platform === 'darwin';
 
 let tray = null;
 
@@ -42,7 +43,7 @@ function createWindow() {
   });
 
   // Create a new tray
-  tray = new Tray(path.join(__dirname, "assets", "logo.png"));
+  tray = new Tray(path.join(__dirname, "assets", isMac ? "maclogo@2x.png" : "logo.png"));
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Toggle Window",
