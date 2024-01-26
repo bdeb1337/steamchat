@@ -21,8 +21,12 @@ function createWindow() {
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, "preload.js"), // use a preload script
+      devTools: false, // disable developer tools
     },
   });
+
+  // Hide the default menu bar
+  win.setMenuBarVisibility(false);
 
   // Load a remote URL
   win.loadURL("https://steamcommunity.com/chat");
