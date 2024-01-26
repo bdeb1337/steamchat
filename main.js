@@ -86,13 +86,17 @@ function createWindow() {
     {
       label: "Quit",
       click: function () {
-        app.isQuiting = true;
-        app.quit();
+        if (process.platform !== 'darwin') {
+          app.isQuiting = true;
+          app.quit();
+        } else {
+          win.close();
+        }
       },
     },
   ]);
 
-  tray.setToolTip("Electron App");
+  tray.setToolTip("steamchat");
   tray.setContextMenu(contextMenu);
 
   // Show the app when the tray icon is clicked
@@ -120,6 +124,7 @@ app.on("activate", () => {
 });
 
 app.on("before-quit", () => {
+  app.isQuiting = true;
   tray.destroy();
 });
 
