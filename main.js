@@ -25,11 +25,11 @@ function createWindow() {
     },
   });
 
-  // Hide the default menu bar
-  win.setMenuBarVisibility(false);
-
   // Load a remote URL
   win.loadURL("https://steamcommunity.com/chat");
+
+  // Remove the default Electron menu
+  Menu.setApplicationMenu(null)
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     // In this case, don't create a new window...
