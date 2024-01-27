@@ -13,20 +13,31 @@
       "category": "public.app-category.social-networking"
     },
     "win": {
-      "target": ["nsis", "portable"]
+      "target": [
+        "nsis",
+        "portable"
+      ]
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
-      "target": ["AppImage", "deb", "rpm"]
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ]
     }
   },
-  "keywords": ["webwrapper", "steam", "chat"],
+  "keywords": [
+    "webwrapper",
+    "steam",
+    "chat"
+  ],
   "author": "bdeb1337",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^13.1.7"
+    "electron": "^28.2.0"
   }
 }
