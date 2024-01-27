@@ -45,7 +45,7 @@
         "rpm"
       ]
     },
-    "publish": "never"
+    "publish": null
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
