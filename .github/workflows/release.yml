@@ -29,6 +29,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add package-lock.json
           git commit -m "Update package-lock.json" -a || echo "No changes to commit"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/bdeb1337/steamchat.git
           git push
 
       - name: Get package info
