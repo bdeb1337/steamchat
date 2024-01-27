@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install electron-builder
-        run: npm install electron-builder
-
 #      - name: Commit changes
 #        run: |
 #          git config --local user.email "action@github.com"

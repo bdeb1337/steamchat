@@ -37,7 +37,8 @@
   ],
   "author": "bdeb1337",
   "license": "ISC",
-  "dependencies": {
-    "electron": "^28.2.0"
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
   }
 }
