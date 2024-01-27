@@ -6,19 +6,19 @@ on:
       - 'v*'
 
 jobs:
-  create_release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #create_release:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Create release
+  #      id: create_release
+  #      uses: softprops/action-gh-release@v1
+  #      env:
+  #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #  outputs:
+  #    upload_url: ${{ steps.create_release.outputs.upload_url }}
     
   release_mac:
-    needs: create_release
+    #needs: create_release
     runs-on: macos-latest
     steps:
       - name: Check out code
@@ -57,7 +57,7 @@ jobs:
       #    asset_content_type: application/x-diskcopy
 
   release_win:
-    needs: create_release
+    #needs: create_release
     runs-on: windows-latest
     steps:
       - name: Check out code
@@ -105,7 +105,7 @@ jobs:
       #    asset_content_type: application/vnd.microsoft.portable-executable
 
   release_linux:
-    needs: create_release
+    #needs: create_release
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
