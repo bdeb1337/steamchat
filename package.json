@@ -2,16 +2,27 @@
   "name": "steamchat",
   "version": "0.0.1",
   "description": "a webwrapper for steam chat",
+  "author": {
+    "name": "bdeb1337",
+    "email": "bdeb1337@jng.li"
+  },
+  "keywords": [
+    "webwrapper",
+    "steam",
+    "chat"
+  ],
+  "license": "ISC",
   "main": "main.js",
   "scripts": {
-    "start": "NODE_ENV=development electron .",
-    "build": "NODE_ENV=production electron-builder",
-    "build:mac": "NODE_ENV=production electron-builder --mac",
-    "build:win": "NODE_ENV=production electron-builder --win",
-    "build:linux": "NODE_ENV=production electron-builder --linux"
+    "start": "cross-env NODE_ENV=development electron .",
+    "build": "cross-env NODE_ENV=production electron-builder",
+    "build:mac": "cross-env NODE_ENV=production electron-builder --mac",
+    "build:win": "cross-env NODE_ENV=production electron-builder --win",
+    "build:linux": "cross-env NODE_ENV=production electron-builder --linux"
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
+    "publish": "never",
     "mac": {
       "category": "public.app-category.social-networking"
     },
@@ -33,14 +44,8 @@
       ]
     }
   },
-  "keywords": [
-    "webwrapper",
-    "steam",
-    "chat"
-  ],
-  "author": "bdeb1337",
-  "license": "ISC",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^28.2.0",
     "electron-builder": "^24.9.1"
   }
