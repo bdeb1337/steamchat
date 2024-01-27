@@ -22,11 +22,12 @@
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
-    "publish": "never",
     "mac": {
+      "icon": "assets/icon.icns",
       "category": "public.app-category.social-networking"
     },
     "win": {
+      "icon": "assets/icon.png",
       "target": [
         "nsis",
         "portable"
@@ -37,12 +38,14 @@
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
+      "icon": "assets/icons",
       "target": [
         "AppImage",
         "deb",
         "rpm"
       ]
-    }
+    },
+    "publish": "never"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
