@@ -1,14 +1,30 @@
 {
-  "name": "steamchat-electron",
-  "version": "1.0.0",
-  "description": "",
+  "name": "steamchat",
+  "version": "0.0.1",
+  "description": "a webwrapper for steam chat",
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development electron .",
-    "build": "NODE_ENV=production electron-builder"
+    "build": "NODE_ENV=production electron-builder -mwl"
   },
-  "keywords": [],
-  "author": "",
+  "build": {
+    "appId": "com.bdeb1337.steamchat",
+    "mac": {
+      "category": "public.app-category.social-networking"
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": ["AppImage", "deb", "rpm"]
+    }
+  },
+  "keywords": ["webwrapper", "steam", "chat"],
+  "author": "bdeb1337",
   "license": "ISC",
   "devDependencies": {
     "electron": "^13.1.7"

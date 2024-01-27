@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package-lock.json
+          git commit -m "Update package-lock.json" -a || echo "No changes to commit"
+          git push
+
+      - name: Get package info
+        id: package_info
+        run: |
+          echo "::set-output name=version::$(node -p "require('./package.json').version")"
+          echo "::set-output name=name::$(node -p "require('./package.json').name")"
+
+      - name: Build app
+        run: npm run build
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload macOS asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-mac.dmg
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-mac.dmg
+          asset_content_type: application/x-diskcopy
+  
+      - name: Upload Windows asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-win-x64.exe
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-win-x64.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload Windows Portable asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ steps.package_info.outputs.name }} Portable ${steps.package_info.outputs.version}.exe
+          asset_name: ${{ steps.package_info.outputs.name }} Portable ${steps.package_info.outputs.version}.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+  
+      - name: Upload Linux asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.AppImage
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.AppImage
+          asset_content_type: application/x-iso9660-image
+
+      - name: Upload Debian asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.deb
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.deb
+          asset_content_type: application/vnd.debian.binary-package
+  
+      - name: Upload RPM asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.rpm
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.rpm
+          asset_content_type: application/x-rpm
