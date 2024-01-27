@@ -23,12 +23,10 @@
   "build": {
     "appId": "com.bdeb1337.steamchat",
     "mac": {
-      "artifactName": "${name}-${version}-${arch}.${ext}",
       "icon": "assets/icon.icns",
       "category": "public.app-category.social-networking"
     },
     "win": {
-      "artifactName": "${name}-${version}-${arch}-setup.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -51,7 +49,6 @@
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
-      "artifactName": "${name}-${version}-${arch}.${ext}",
       "icon": "assets/icons",
       "target": [
         "AppImage",
