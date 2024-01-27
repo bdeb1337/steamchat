@@ -6,6 +6,19 @@ const {
   Tray,
   Menu,
 } = require("electron");
+
+// Auto Updater
+const { autoUpdater } = require('electron-updater');
+autoUpdater.checkForUpdatesAndNotify();
+
+autoUpdater.on('update-available', () => {
+  // Notify user that an update is available
+});
+
+autoUpdater.on('update-downloaded', () => {
+  // Notify user that the update is ready to be installed
+});
+
 const path = require("path");
 const isMac = process.platform === 'darwin';
 

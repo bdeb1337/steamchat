@@ -61,6 +61,8 @@
     },
     "publish": {
       "provider": "github",
+      "owner": "bdeb1337",
+      "repo": "steamchat",
       "releaseType": "draft",
       "publishAutoUpdate": true
     }
@@ -69,5 +71,8 @@
     "cross-env": "^7.0.3",
     "electron": "^28.2.0",
     "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.7"
   }
 }

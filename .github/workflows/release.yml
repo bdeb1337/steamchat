@@ -6,19 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  #create_release:
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - name: Create release
-  #      id: create_release
-  #      uses: softprops/action-gh-release@v1
-  #      env:
-  #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #  outputs:
-  #    upload_url: ${{ steps.create_release.outputs.upload_url }}
-    
   release_mac:
-    #needs: create_release
     runs-on: macos-latest
     steps:
       - name: Check out code
@@ -34,30 +22,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      #- name: Get package info
-      #  id: package_info
-      #  run: |
-      #    echo "::set-output name=version::$(node -p "require('./package.json').version")"
-      #    echo "::set-output name=name::$(node -p "require('./package.json').name")"
-      #    echo "::set-output name=arch::$(node -p 'require("os").arch()')"
-
       - name: Build app
         run: npm run build:mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      #- name: Upload macOS asset
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ needs.create_release.outputs.upload_url }}
-      #    asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.dmg
-      #    asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.dmg
-      #    asset_content_type: application/x-diskcopy
 
   release_win:
-    #needs: create_release
     runs-on: windows-latest
     steps:
       - name: Check out code
@@ -73,39 +43,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      #- name: Get package info
-      #  id: package_info
-      #  run: |
-      #    echo "::set-output name=version::$(node -p "require('./package.json').version")"
-      #    echo "::set-output name=name::$(node -p "require('./package.json').name")"
-
       - name: Build app
         run: npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: Upload Windows asset
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ needs.create_release.outputs.upload_url }}
-      #    asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-setup.exe
-      #    asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-setup.exe
-      #    asset_content_type: application/vnd.microsoft.portable-executable
-
-      #- name: Upload Windows Portable asset
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ needs.create_release.outputs.upload_url }}
-      #    asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-portable.exe
-      #    asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-portable.exe
-      #    asset_content_type: application/vnd.microsoft.portable-executable
-
   release_linux:
-    #needs: create_release
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -121,43 +64,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      #- name: Get package info
-      #  id: package_info
-      #  run: |
-      #    echo "::set-output name=version::$(node -p "require('./package.json').version")"
-      #    echo "::set-output name=name::$(node -p "require('./package.json').name")"
-
       - name: Build app
         run: npm run build:linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      #- name: Upload Linux asset
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ needs.create_release.outputs.upload_url }}
-      #    asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.AppImage
-      #    asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.AppImage
-      #    asset_content_type: application/x-iso9660-image
-
-      #- name: Upload Debian asset
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ needs.create_release.outputs.upload_url }}
-      #    asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.deb
-      #    asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.deb
-      #    asset_content_type: application/vnd.debian.binary-package
-  
-      #- name: Upload RPM asset
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ needs.create_release.outputs.upload_url }}
-      #    asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.rpm
-      #    asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.rpm
-      #    asset_content_type: application/x-rpm
