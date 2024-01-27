@@ -22,6 +22,7 @@
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
+    "artifactName": "${name}-${version}-${arch}.${ext}",
     "mac": {
       "icon": "assets/icon.icns",
       "category": "public.app-category.social-networking"
@@ -29,8 +30,14 @@
     "win": {
       "icon": "assets/icon.png",
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "artifactName": "${name}-${version}-${arch}-setup.${ext}"
+        },
+        {
+          "target": "portable",
+          "artifactName": "${name}-${version}-${arch}-portable.${ext}"
+        }
       ]
     },
     "nsis": {

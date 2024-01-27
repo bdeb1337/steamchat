@@ -39,6 +39,7 @@ jobs:
         run: |
           echo "::set-output name=version::$(node -p "require('./package.json').version")"
           echo "::set-output name=name::$(node -p "require('./package.json').name")"
+          echo "::set-output name=arch::$(node -p "require('os').arch()")
 
       - name: Build app
         run: npm run build:mac
@@ -49,8 +50,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-mac.dmg
-          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-mac.dmg
+          asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.dmg
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.dmg
           asset_content_type: application/x-diskcopy
 
   release_win:
@@ -85,8 +86,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-win-x64.exe
-          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-win-x64.exe
+          asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-setup.exe
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-setup.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Upload Windows Portable asset
@@ -95,8 +96,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.package_info.outputs.name }} Portable ${steps.package_info.outputs.version}.exe
-          asset_name: ${{ steps.package_info.outputs.name }} Portable ${steps.package_info.outputs.version}.exe
+          asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-portable.exe
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}-portable.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
   release_linux:
@@ -131,8 +132,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.AppImage
-          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.AppImage
+          asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.AppImage
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.AppImage
           asset_content_type: application/x-iso9660-image
 
       - name: Upload Debian asset
@@ -141,8 +142,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.deb
-          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.deb
+          asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.deb
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.deb
           asset_content_type: application/vnd.debian.binary-package
   
       - name: Upload RPM asset
@@ -151,6 +152,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.rpm
-          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-linux-x64.rpm
+          asset_path: dist/${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.rpm
+          asset_name: ${{ steps.package_info.outputs.name }}-${{ steps.package_info.outputs.version }}-${{ steps.package_info.outputs.arch }}.rpm
           asset_content_type: application/x-rpm
