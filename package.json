@@ -5,7 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development electron .",
-    "build": "NODE_ENV=production electron-builder -mwl"
+    "build": "NODE_ENV=production electron-builder",
+    "build:mac": "NODE_ENV=production electron-builder --mac",
+    "build:win": "NODE_ENV=production electron-builder --win",
+    "build:linux": "NODE_ENV=production electron-builder --linux"
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
