@@ -22,21 +22,27 @@
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
-    "artifactName": "${name}-${version}-${arch}.${ext}",
     "mac": {
+      "artifactName": "${name}-${version}-${arch}.${ext}",
       "icon": "assets/icon.icns",
       "category": "public.app-category.social-networking"
     },
     "win": {
-      "icon": "assets/icon.png",
+      "artifactName": "${name}-${version}-${arch}-setup.${ext}",
       "target": [
         {
           "target": "nsis",
-          "artifactName": "${name}-${version}-${arch}-setup.${ext}"
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         },
         {
           "target": "portable",
-          "artifactName": "${name}-${version}-${arch}-portable.${ext}"
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         }
       ]
     },
@@ -45,6 +51,7 @@
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
+      "artifactName": "${name}-${version}-${arch}.${ext}",
       "icon": "assets/icons",
       "target": [
         "AppImage",
@@ -52,7 +59,11 @@
         "rpm"
       ]
     },
-    "publish": null
+    "publish": {
+      "provider": "github",
+      "releaseType": "draft",
+      "publishAutoUpdate": true
+    }
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
