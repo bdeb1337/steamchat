@@ -58,19 +58,19 @@ function removeDefaultElectronMenu(win) {
   }
 }
 
+function hideWindow(win) {
+  win.hide();
+  if (process.platform === "darwin") {
+    app.dock.hide();
+  }
+}
+
 function handleWindowEvents(win) {
   win.webContents.setWindowOpenHandler(({ url }) => {
     win.loadURL(url);
     return { action: "deny" };
   });
 
-  function hideWindow(win) {
-    win.hide();
-    if (process.platform === "darwin") {
-      app.dock.hide();
-    }
-  }
-  
   win.on("close", function (event) {
     if (!app.isQuiting) {
       event.preventDefault();
@@ -83,16 +83,14 @@ function handleWindowEvents(win) {
     event.preventDefault();
     hideWindow(win);
   });
+}
 
 function toggleWindowMenuItem(win) {
   return {
     label: "Toggle Window",
     click: function () {
       if (win.isVisible()) {
-        win.hide();
-        if (process.platform === "darwin") {
-          app.dock.hide();
-        }
+        hideWindow(win);
       } else {
         win.show();
         if (process.platform === "darwin") {
