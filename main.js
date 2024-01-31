@@ -8,19 +8,19 @@ const {
 } = require("electron");
 
 // Auto Updater
-const { autoUpdater } = require('electron-updater');
+const { autoUpdater } = require("electron-updater");
 autoUpdater.checkForUpdatesAndNotify();
 
-autoUpdater.on('update-available', () => {
+autoUpdater.on("update-available", () => {
   // Notify user that an update is available
 });
 
-autoUpdater.on('update-downloaded', () => {
+autoUpdater.on("update-downloaded", () => {
   // Notify user that the update is ready to be installed
 });
 
 const path = require("path");
-const isMac = process.platform === 'darwin';
+const isMac = process.platform === "darwin";
 
 let tray = null;
 
@@ -29,12 +29,13 @@ function createWindow() {
     width: 800,
     height: 600,
     icon: path.join(__dirname, "assets", "icon.png"),
+    show: false,
     webPreferences: {
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, "preload.js"), // use a preload script
-      devTools: process.env.NODE_ENV !== 'production', // disable developer tools
+      devTools: process.env.NODE_ENV !== "production", // disable developer tools
     },
   });
 
@@ -42,9 +43,9 @@ function createWindow() {
   win.loadURL("https://steamcommunity.com/chat");
 
   // Remove the default Electron menu
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     Menu.setApplicationMenu(null);
-    win.webContents.on('devtools-opened', () => {
+    win.webContents.on("devtools-opened", () => {
       win.webContents.closeDevTools();
     });
   }
@@ -52,7 +53,7 @@ function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => {
     // In this case, don't create a new window...
     win.loadURL(url);
-    return { action: 'deny' };
+    return { action: "deny" };
   });
 
   // Minimize to tray instead of closing
@@ -60,20 +61,40 @@ function createWindow() {
     if (!app.isQuiting) {
       event.preventDefault();
       win.hide();
+      if (process.platform === "darwin") {
+        app.dock.hide();
+      }
     }
     return false;
   });
 
+  // Minimize to tray instead of minimizing to taskbar
+  win.on("minimize", function (event) {
+    event.preventDefault();
+    win.hide();
+    if (process.platform === "darwin") {
+      app.dock.hide();
+    }
+  });
+
   // Create a new tray
-  tray = new Tray(path.join(__dirname, "assets", isMac ? "macTrayIcon@2x.png" : "icon.png"));
+  tray = new Tray(
+    path.join(__dirname, "assets", isMac ? "macTrayIcon@2x.png" : "icon.png")
+  );
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Toggle Window",
       click: function () {
         if (win.isVisible()) {
           win.hide();
+          if (process.platform === "darwin") {
+            app.dock.hide();
+          }
         } else {
           win.show();
+          if (process.platform === "darwin") {
+            app.dock.show();
+          }
         }
       },
     },
@@ -104,30 +125,39 @@ function createWindow() {
     {
       label: "Quit",
       click: function () {
-        if (process.platform !== 'darwin') {
-          app.isQuiting = true;
-          app.quit();
-        } else {
-          win.close();
-        }
+        app.isQuiting = true;
+        app.quit();
       },
     },
   ]);
 
+  // Handle tray tooltip (persona name)
   tray.setToolTip("steamchat");
+  setInterval(() => {
+    win.webContents
+      .executeJavaScript(
+        "this.g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;"
+      )
+      .then((persona_name) => {
+        if (persona_name) {
+          tray.setToolTip(`${persona_name} - steamchat`);
+        } else {
+          tray.setToolTip("steamchat");
+        }
+      })
+      .catch((error) => {
+        console.error("An error occurred:", error);
+      });
+  }, 10000);
   tray.setContextMenu(contextMenu);
-
-  // Show the app when the tray icon is clicked
-  tray.on("click", function () {
-    if (win.isVisible()) {
-      win.hide();
-    } else {
-      win.show();
-    }
-  });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  if (process.platform === "darwin") {
+    app.dock.hide();
+  }
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
