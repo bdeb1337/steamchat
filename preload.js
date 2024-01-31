@@ -10,13 +10,8 @@ window.addEventListener("DOMContentLoaded", () => {
     replaceText(`${type}-version`, process.versions[type]);
   }
 
-  function removeElementById(id) {
-    const element = document.querySelector(`div[id="${id}"]`);
-    if (element) element.remove();
-  }
-  
-  function removeElementByClass(className) {
-    const element = document.querySelector(`div[class="${className}"]`);
+  function removeElement(selector) {
+    const element = document.querySelector(selector);
     if (element) element.remove();
   }
   
@@ -33,7 +28,7 @@ window.addEventListener("DOMContentLoaded", () => {
   function handleMutation(mutation) {
     if (mutation.type === "childList") {
       // Remove the Steam Chat header
-      removeElementByClass("main_SteamPageHeader_3NLSM");
+      removeElement(`div[class="main_SteamPageHeader_3NLSM"]`);
   
       // Remove the Steam Community navigation bar
       // and replace with a link to the Steam Chat
@@ -43,11 +38,11 @@ window.addEventListener("DOMContentLoaded", () => {
         "store_nav_area",
         "global_actions"
       ];
-      idRemoveList.forEach(removeElementById);
+      idRemoveList.forEach(id => removeElement(`div[id="${id}"]`));
   
       // Remove the non-responsive Steam Community navigation bar
       const classRemoveList = ["supernav_container"];
-      classRemoveList.forEach(removeElementByClass);
+      classRemoveList.forEach(className => removeElement(`div[class="${className}"]`));
   
       // Replace the href in the logo
       replaceLogoHref(`div[class="logo"]`);
