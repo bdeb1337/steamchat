@@ -64,75 +64,73 @@ function handleWindowEvents(win) {
     return { action: "deny" };
   });
 
-  win.on("close", function (event) {
-    if (!app.isQuiting) {
-      event.preventDefault();
-      win.hide();
-      if (process.platform === "darwin") {
-        app.dock.hide();
-      }
-    }
-    return false;
-  });
-
-  win.on("minimize", function (event) {
-    event.preventDefault();
+  function hideWindow(win) {
     win.hide();
     if (process.platform === "darwin") {
       app.dock.hide();
     }
+  }
+  
+  win.on("close", function (event) {
+    if (!app.isQuiting) {
+      event.preventDefault();
+      hideWindow(win);
+    }
+    return false;
   });
+  
+  win.on("minimize", function (event) {
+    event.preventDefault();
+    hideWindow(win);
+  });
+
+function toggleWindowMenuItem(win) {
+  return {
+    label: "Toggle Window",
+    click: function () {
+      if (win.isVisible()) {
+        win.hide();
+        if (process.platform === "darwin") {
+          app.dock.hide();
+        }
+      } else {
+        win.show();
+        if (process.platform === "darwin") {
+          app.dock.show();
+        }
+      }
+    },
+  };
+}
+
+function statusMenuItem(win, status) {
+  return {
+    label: status,
+    click: function () {
+      win.webContents.executeJavaScript(
+        `this.GetCurrentUserStatusInterface().SetUser${status}();`
+      );
+    },
+  };
+}
+
+function quitMenuItem() {
+  return {
+    label: "Quit",
+    click: function () {
+      app.isQuiting = true;
+      app.quit();
+    },
+  };
 }
 
 function createContextMenu(win) {
   return Menu.buildFromTemplate([
-    {
-      label: "Toggle Window",
-      click: function () {
-        if (win.isVisible()) {
-          win.hide();
-          if (process.platform === "darwin") {
-            app.dock.hide();
-          }
-        } else {
-          win.show();
-          if (process.platform === "darwin") {
-            app.dock.show();
-          }
-        }
-      },
-    },
-    {
-      label: "Online",
-      click: function () {
-        win.webContents.executeJavaScript(
-          "this.GetCurrentUserStatusInterface().SetUserOnline();"
-        );
-      },
-    },
-    {
-      label: "Away",
-      click: function () {
-        win.webContents.executeJavaScript(
-          "this.GetCurrentUserStatusInterface().SetUserAway();"
-        );
-      },
-    },
-    {
-      label: "Invisible",
-      click: function () {
-        win.webContents.executeJavaScript(
-          "this.GetCurrentUserStatusInterface().SetUserInvisible();"
-        );
-      },
-    },
-    {
-      label: "Quit",
-      click: function () {
-        app.isQuiting = true;
-        app.quit();
-      },
-    },
+    toggleWindowMenuItem(win),
+    statusMenuItem(win, "Online"),
+    statusMenuItem(win, "Away"),
+    statusMenuItem(win, "Invisible"),
+    quitMenuItem(),
   ]);
 }
 
