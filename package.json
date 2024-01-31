@@ -14,11 +14,11 @@
   "license": "ISC",
   "main": "main.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development electron .",
-    "build": "cross-env NODE_ENV=production electron-builder",
-    "build:mac": "cross-env NODE_ENV=production electron-builder --mac",
-    "build:win": "cross-env NODE_ENV=production electron-builder --win",
-    "build:linux": "cross-env NODE_ENV=production electron-builder --linux"
+    "start": "NODE_ENV=development electron .",
+    "build": "NODE_ENV=production electron-builder",
+    "build:mac": "NODE_ENV=production electron-builder --mac",
+    "build:win": "set NODE_ENV=production&& electron-builder --win",
+    "build:linux": "NODE_ENV=production electron-builder --linux"
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
@@ -65,7 +65,6 @@
     }
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
     "electron": "^28.2.0",
     "electron-builder": "^24.9.1"
   },
