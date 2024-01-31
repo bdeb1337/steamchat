@@ -1,3 +1,4 @@
+// Modules to control application life and create native browser window
 const {
   app,
   BrowserWindow,
@@ -7,7 +8,12 @@ const {
   Menu,
 } = require("electron");
 
-// Auto Updater
+// Variables
+const path = require("path");
+const isMac = process.platform === "darwin";
+let tray = null;
+
+// AutoUpdater
 const { autoUpdater } = require("electron-updater");
 autoUpdater.checkForUpdatesAndNotify();
 
@@ -19,44 +25,45 @@ autoUpdater.on("update-downloaded", () => {
   // Notify user that the update is ready to be installed
 });
 
-const path = require("path");
-const isMac = process.platform === "darwin";
+// Web preferences options
+function setWebPreferences() {
+  return {
+    nodeIntegration: false, // is default value after Electron v5
+    contextIsolation: true, // protect against prototype pollution
+    enableRemoteModule: false, // turn off remote
+    preload: path.join(__dirname, "preload.js"), // use a preload script
+  };
+}
 
-let tray = null;
-
-function createWindow() {
+function createBrowserWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
     icon: path.join(__dirname, "assets", "icon.png"),
     show: false,
-    webPreferences: {
-      nodeIntegration: false, // is default value after Electron v5
-      contextIsolation: true, // protect against prototype pollution
-      enableRemoteModule: false, // turn off remote
-      preload: path.join(__dirname, "preload.js"), // use a preload script
-      devTools: process.env.NODE_ENV !== "production", // disable developer tools
-    },
+    webPreferences: setWebPreferences(),
   });
 
-  // Load a remote URL
   win.loadURL("https://steamcommunity.com/chat");
 
-  // Remove the default Electron menu
+  return win;
+}
+
+function removeDefaultElectronMenu(win) {
   if (process.env.NODE_ENV === "production") {
     Menu.setApplicationMenu(null);
     win.webContents.on("devtools-opened", () => {
       win.webContents.closeDevTools();
     });
   }
+}
 
+function handleWindowEvents(win) {
   win.webContents.setWindowOpenHandler(({ url }) => {
-    // In this case, don't create a new window...
     win.loadURL(url);
     return { action: "deny" };
   });
 
-  // Minimize to tray instead of closing
   win.on("close", function (event) {
     if (!app.isQuiting) {
       event.preventDefault();
@@ -68,7 +75,6 @@ function createWindow() {
     return false;
   });
 
-  // Minimize to tray instead of minimizing to taskbar
   win.on("minimize", function (event) {
     event.preventDefault();
     win.hide();
@@ -76,12 +82,10 @@ function createWindow() {
       app.dock.hide();
     }
   });
+}
 
-  // Create a new tray
-  tray = new Tray(
-    path.join(__dirname, "assets", isMac ? "macTrayIcon@2x.png" : "icon.png")
-  );
-  const contextMenu = Menu.buildFromTemplate([
+function createContextMenu(win) {
+  return Menu.buildFromTemplate([
     {
       label: "Toggle Window",
       click: function () {
@@ -130,9 +134,9 @@ function createWindow() {
       },
     },
   ]);
+}
 
-  // Handle tray tooltip (persona name)
-  tray.setToolTip("steamchat");
+function handleTrayTooltip(win, tray) {
   setInterval(() => {
     win.webContents
       .executeJavaScript(
@@ -149,9 +153,25 @@ function createWindow() {
         console.error("An error occurred:", error);
       });
   }, 10000);
-  tray.setContextMenu(contextMenu);
 }
 
+function createTray(win) {
+  tray = new Tray(
+    path.join(__dirname, "assets", isMac ? "macTrayIcon@2x.png" : "icon.png")
+  );
+  const contextMenu = createContextMenu(win);
+  tray.setContextMenu(contextMenu);
+  handleTrayTooltip(win, tray);
+}
+
+function createWindow() {
+  const win = createBrowserWindow();
+  removeDefaultElectronMenu(win);
+  handleWindowEvents(win);
+  createTray(win);
+}
+
+// App events
 app.whenReady().then(() => {
   createWindow();
   if (process.platform === "darwin") {
