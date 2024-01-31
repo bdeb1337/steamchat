@@ -10,62 +10,56 @@ window.addEventListener("DOMContentLoaded", () => {
     replaceText(`${type}-version`, process.versions[type]);
   }
 
-  // Create a new MutationObserver instance
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        // Remove the Steam Chat header
-        const chatHeader = document.querySelector(
-          ".main_SteamPageHeader_3NLSM"
-        );
-        if (chatHeader) chatHeader.remove();
+  function removeElementById(id) {
+    const element = document.querySelector(`div[id="${id}"]`);
+    if (element) element.remove();
+  }
   
-        // Remove the Steam Community navigation bar
-        // and replace with a link to the Steam Chat
-        const idRemoveList = [
-            "responsive_menu_logo",
-            "store_controls",
-            "store_nav_area",
-            "global_actions"
-        ];
-        // Iterate over the idRemoveList array and remove the elements
-        idRemoveList.forEach(function(id) {
-            const element = document.querySelector(`div[id="${id}"]`);
-            if (element) element.remove();
-        });
+  function removeElementByClass(className) {
+    const element = document.querySelector(`div[class="${className}"]`);
+    if (element) element.remove();
+  }
+  
+  function replaceLogoHref(selector) {
+    const logo = document.querySelector(selector);
+    if (logo) {
+      const links = logo.querySelectorAll("a");
+      links.forEach(function(link) {
+        link.href = "https://steamcommunity.com/chat";
+      });
+    }
+  }
+  
+  function handleMutation(mutation) {
+    if (mutation.type === "childList") {
+      // Remove the Steam Chat header
+      removeElementByClass("main_SteamPageHeader_3NLSM");
+  
+      // Remove the Steam Community navigation bar
+      // and replace with a link to the Steam Chat
+      const idRemoveList = [
+        "responsive_menu_logo",
+        "store_controls",
+        "store_nav_area",
+        "global_actions"
+      ];
+      idRemoveList.forEach(removeElementById);
+  
+      // Remove the non-responsive Steam Community navigation bar
+      const classRemoveList = ["supernav_container"];
+      classRemoveList.forEach(removeElementByClass);
+  
+      // Replace the href in the logo
+      replaceLogoHref(`div[class="logo"]`);
+      replaceLogoHref(".responsive_header_logo");
+    }
+  }
 
-        // Remove the non-responsive Steam Community navigation bar
-        const classRemoveList = [
-            "supernav_container"
-        ];
-        // Iterate over the classRemoveList array and remove the elements
-        classRemoveList.forEach(function(className) {
-            const element = document.querySelector(`div[class="${className}"]`);
-            if (element) element.remove();
-        });
+  function handleMutations(mutations) {
+    mutations.forEach(handleMutation);
+  }
 
-        // Search for the class logo
-        // in non-responsive mode, the logo is in a different location
-        const headerLogo = document.querySelector(`div[class="logo"]`);
-        // if the logo is found, replace the href in any child <a> to the Steam Chat
-        if (headerLogo) {
-            const links = headerLogo.querySelectorAll("a");
-            links.forEach(function(link) {
-                link.href = "https://steamcommunity.com/chat";
-            });
-        }
-        // in responsive mode, the logo is in a different location
-        const responsiveHeaderLogo = document.querySelector(".responsive_header_logo");
-        // if the logo is found, replace the href in any child <a> to the Steam Chat
-        if (responsiveHeaderLogo) {
-            const links = responsiveHeaderLogo.querySelectorAll("a");
-            links.forEach(function(link) {
-                link.href = "https://steamcommunity.com/chat";
-            });
-        }
-      }
-    });
-  });
+  const observer = new MutationObserver(handleMutations);
 
   // Start observing the document with the configured parameters
   observer.observe(document, { childList: true, subtree: true });
