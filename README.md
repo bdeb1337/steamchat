@@ -2,24 +2,16 @@
   <img src="./assets/icon.png" alt="steamchat" width="25%">
 </p>
 
-<p align="center">
-  <table>
-    <tr>
-      <td align="center">
-        <a href="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml">
-          <img src="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml/badge.svg" alt="Release">
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://codeclimate.com/github/bdeb1337/steamchat/maintainability">
-          <img src="https://api.codeclimate.com/v1/badges/4f78b6c7abea3976b6ad/maintainability" />
-        </a>
-      </td>
-    </tr>
-  </table>
-</p>
+<div align="center">
+  <a href="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml">
+    <img src="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml/badge.svg" alt="Release">
+  </a>
+  <a href="https://codeclimate.com/github/bdeb1337/steamchat/maintainability">
+    <img src="https://api.codeclimate.com/v1/badges/4f78b6c7abea3976b6ad/maintainability" />
+  </a>
+</div>
 
-#  steamchat 
+<h1 align="center">steamchat</h1>
 
 Steamchat is an electron web wrapper for **Steam Chat** (https://steamcommunity.com/chat), designed primarily to replace the Steam Chat experience on macOS with the official Steam client, which I did not like. It is also available for Windows and Linux.
 
