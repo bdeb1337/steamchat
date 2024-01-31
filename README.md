@@ -3,9 +3,21 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml">
-    <img src="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml/badge.svg" alt="Release">
-  </a>
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml">
+          <img src="https://github.com/bdeb1337/steamchat/actions/workflows/release.yml/badge.svg" alt="Release">
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://codeclimate.com/github/bdeb1337/steamchat/maintainability">
+          <img src="https://api.codeclimate.com/v1/badges/4f78b6c7abea3976b6ad/maintainability" />
+        </a>
+      </td>
+    </tr>
+  </table>
+</p>
 
 #  steamchat 
 
