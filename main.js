@@ -83,6 +83,13 @@ function hideWindow(win) {
   }
 }
 
+function showWindow(win) {
+  win.show();
+  if (process.platform === "darwin") {
+    app.dock.show();
+  }
+}
+
 function handleWindowEvents(win) {
   win.webContents.setWindowOpenHandler(({ url }) => {
     win.loadURL(url);
@@ -110,10 +117,7 @@ function toggleWindowMenuItem(win) {
       if (win.isVisible()) {
         hideWindow(win);
       } else {
-        win.show();
-        if (process.platform === "darwin") {
-          app.dock.show();
-        }
+        showWindow(win);
       }
     },
   };
