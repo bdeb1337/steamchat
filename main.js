@@ -76,18 +76,26 @@ function removeDefaultElectronMenu(win) {
   }
 }
 
-function hideWindow(win) {
-  win.hide();
-  if (process.platform === "darwin") {
+function setDockVisibility(visible) {
+  if (process.platform !== "darwin") {
+    return;
+  }
+
+  if (visible) {
+    app.dock.show();
+  } else {
     app.dock.hide();
   }
 }
 
+function hideWindow(win) {
+  win.hide();
+  setDockVisibility(false);
+}
+
 function showWindow(win) {
   win.show();
-  if (process.platform === "darwin") {
-    app.dock.show();
-  }
+  setDockVisibility(true);
 }
 
 function handleWindowEvents(win) {
