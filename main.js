@@ -161,6 +161,10 @@ function statusMenuItem(win, status) {
 let currentStatus = null;
 
 async function updateMenuLabels(win, menuItems) {
+  // Check if the current URL is 'https://steamcommunity.com/login/home/?goto=%2Fchat'
+  if (win.webContents.getURL() === 'https://steamcommunity.com/login/home/?goto=%2Fchat') {
+    return; // If it is, exit the function
+  }
   const newStatus = await win.webContents.executeJavaScript(
     `this.GetCurrentUserStatusInterface().GetPersonaState();`
   );
@@ -182,6 +186,17 @@ async function updateMenuLabels(win, menuItems) {
   }
 }
 
+function clearLocalStorageMenuItem(win) {
+  return {
+    label: "Clear Local Storage",
+    click: function () {
+      win.webContents.session.clearStorageData().then(() => {
+        win.reload();
+      });
+    },
+  };
+}
+
 function quitMenuItem() {
   return {
     label: "Quit",
@@ -198,6 +213,7 @@ function createContextMenu(win) {
     statusMenuItem(win, "Online"),
     statusMenuItem(win, "Away"),
     statusMenuItem(win, "Invisible"),
+    clearLocalStorageMenuItem(win),
     quitMenuItem(),
   ];
 
@@ -207,6 +223,10 @@ function createContextMenu(win) {
 
 function handleTrayTooltip(win, tray) {
   setInterval(() => {
+    // Check if the current URL is 'https://steamcommunity.com/login/home/?goto=%2Fchat'
+    if (win.webContents.getURL() === 'https://steamcommunity.com/login/home/?goto=%2Fchat') {
+      return; // If it is, exit the function
+    }
     win.webContents
       .executeJavaScript(
         "this.g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;"
