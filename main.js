@@ -124,15 +124,19 @@ function handleWindowEvents(win) {
   });
 }
 
+function toggleWindow(win) {
+  if (win.isVisible()) {
+    win.hide();
+  } else {
+    win.show();
+  }
+}
+
 function toggleWindowMenuItem(win) {
   return {
     label: "Toggle Window",
     click: function () {
-      if (win.isVisible()) {
-        hideWindow(win);
-      } else {
-        showWindow(win);
-      }
+      toggleWindow(win);
     },
   };
 }
@@ -227,6 +231,10 @@ function createTray(win) {
   const { contextMenu } = createContextMenu(win);
   tray.setContextMenu(contextMenu);
   handleTrayTooltip(win, tray);
+
+  tray.on('click', () => {
+    toggleWindow(win);
+  });
 }
 
 function createWindow() {
