@@ -17,30 +17,36 @@ let tray = null;
 const { autoUpdater } = require("electron-updater");
 autoUpdater.checkForUpdatesAndNotify();
 
-autoUpdater.on('update-available', () => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update available',
-    message: 'A new version of the app is available. Would you like to download it now?',
-    buttons: ['Yes', 'No']
-  }).then(result => {
-    if (result.response === 0) {
-      autoUpdater.downloadUpdate();
-    }
-  });
+autoUpdater.on("update-available", () => {
+  dialog
+    .showMessageBox({
+      type: "info",
+      title: "Update available",
+      message:
+        "A new version of the app is available. Would you like to download it now?",
+      buttons: ["Yes", "No"],
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.downloadUpdate();
+      }
+    });
 });
 
-autoUpdater.on('update-downloaded', () => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update ready',
-    message: 'Install and restart now?',
-    buttons: ['Yes', 'Later']
-  }, (response) => {
-    if (response === 0) {
-      autoUpdater.quitAndInstall();
+autoUpdater.on("update-downloaded", () => {
+  dialog.showMessageBox(
+    {
+      type: "info",
+      title: "Update ready",
+      message: "Install and restart now?",
+      buttons: ["Yes", "Later"],
+    },
+    (response) => {
+      if (response === 0) {
+        autoUpdater.quitAndInstall();
+      }
     }
-  });
+  );
 });
 
 // Web preferences options
@@ -111,7 +117,7 @@ function handleWindowEvents(win) {
     }
     return false;
   });
-  
+
   win.on("minimize", function (event) {
     event.preventDefault();
     hideWindow(win);
@@ -131,6 +137,12 @@ function toggleWindowMenuItem(win) {
   };
 }
 
+const statusMap = {
+  1: "Online",
+  3: "Away",
+  7: "Invisible",
+};
+
 function statusMenuItem(win, status) {
   return {
     label: status,
@@ -140,6 +152,30 @@ function statusMenuItem(win, status) {
       );
     },
   };
+}
+
+let currentStatus = null;
+
+async function updateMenuLabels(win, menuItems) {
+  const newStatus = await win.webContents.executeJavaScript(
+    `this.GetCurrentUserStatusInterface().GetPersonaState();`
+  );
+
+  if (newStatus !== currentStatus) {
+    currentStatus = newStatus;
+
+    for (const item of menuItems) {
+      if (item.label === statusMap[currentStatus]) {
+        item.label = `• ${item.label}`; // Add dot indicator to the current status
+      } else {
+        item.label = item.label.replace("• ", ""); // Remove dot indicator from other statuses
+      }
+    }
+
+    // Rebuild the context menu with the updated menu items
+    const contextMenu = Menu.buildFromTemplate(menuItems);
+    tray.setContextMenu(contextMenu); // Set the updated context menu on the tray
+  }
 }
 
 function quitMenuItem() {
@@ -153,13 +189,16 @@ function quitMenuItem() {
 }
 
 function createContextMenu(win) {
-  return Menu.buildFromTemplate([
+  const menuItems = [
     toggleWindowMenuItem(win),
     statusMenuItem(win, "Online"),
     statusMenuItem(win, "Away"),
     statusMenuItem(win, "Invisible"),
     quitMenuItem(),
-  ]);
+  ];
+
+  const contextMenu = Menu.buildFromTemplate(menuItems);
+  return { contextMenu, menuItems };
 }
 
 function handleTrayTooltip(win, tray) {
@@ -185,7 +224,7 @@ function createTray(win) {
   tray = new Tray(
     path.join(__dirname, "assets", isMac ? "macTrayIcon@2x.png" : "icon.png")
   );
-  const contextMenu = createContextMenu(win);
+  const { contextMenu } = createContextMenu(win);
   tray.setContextMenu(contextMenu);
   handleTrayTooltip(win, tray);
 }
@@ -194,7 +233,14 @@ function createWindow() {
   const win = createBrowserWindow();
   removeDefaultElectronMenu(win);
   handleWindowEvents(win);
-  createTray(win);
+
+  const { contextMenu, menuItems } = createContextMenu(win);
+  createTray(win, contextMenu);
+
+  // Call updateMenuLabels every second to keep it up to date.
+  setInterval(() => {
+    updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
+  }, 1000);
 }
 
 // App events
