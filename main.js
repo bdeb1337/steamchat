@@ -125,29 +125,37 @@ function statusMenuItem(win, status) {
 
 let currentStatus = null;
 
-async function updateMenuLabels(win, menuItems) {
-  // Exit the function if URL is not 'https://steamcommunity.com/chat'
+async function getNewStatus(win) {
   if (win.webContents.getURL() !== 'https://steamcommunity.com/chat') {
-    return;
+    return null;
   }
-  const newStatus = await win.webContents.executeJavaScript(
+  return await win.webContents.executeJavaScript(
     `this.GetCurrentUserStatusInterface().GetPersonaState();`
   );
+}
 
-  if (newStatus !== currentStatus) {
-    currentStatus = newStatus;
-
-    for (const item of menuItems) {
-      if (item.label === statusMap[currentStatus]) {
-        item.label = `• ${item.label}`; // Add dot indicator to the current status
-      } else {
-        item.label = item.label.replace("• ", ""); // Remove dot indicator from other statuses
-      }
+function updateStatusLabels(menuItems, newStatus) {
+  for (const item of menuItems) {
+    if (item.label === statusMap[newStatus]) {
+      item.label = `• ${item.label}`; // Add dot indicator to the current status
+    } else {
+      item.label = item.label.replace("• ", ""); // Remove dot indicator from other statuses
     }
+  }
+}
 
-    // Rebuild the context menu with the updated menu items
-    const contextMenu = Menu.buildFromTemplate(menuItems);
-    tray.setContextMenu(contextMenu); // Set the updated context menu on the tray
+function rebuildContextMenu(menuItems) {
+  const contextMenu = Menu.buildFromTemplate(menuItems);
+  tray.setContextMenu(contextMenu); // Set the updated context menu on the tray
+}
+
+async function updateMenuLabels(win, menuItems) {
+  const newStatus = await getNewStatus(win);
+
+  if (newStatus !== null && newStatus !== currentStatus) {
+    currentStatus = newStatus;
+    updateStatusLabels(menuItems, newStatus);
+    rebuildContextMenu(menuItems);
   }
 }
 
