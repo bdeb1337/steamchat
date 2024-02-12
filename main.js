@@ -2,6 +2,7 @@
 const {
   app,
   BrowserWindow,
+  dialog,
   ipcMain,
   Notification,
   Tray,
