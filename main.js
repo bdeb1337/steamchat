@@ -161,9 +161,9 @@ function statusMenuItem(win, status) {
 let currentStatus = null;
 
 async function updateMenuLabels(win, menuItems) {
-  // Check if the current URL is 'https://steamcommunity.com/login/home/?goto=%2Fchat'
-  if (win.webContents.getURL() === 'https://steamcommunity.com/login/home/?goto=%2Fchat') {
-    return; // If it is, exit the function
+  // Exit the function if URL is not 'https://steamcommunity.com/chat'
+  if (win.webContents.getURL() !== 'https://steamcommunity.com/chat') {
+    return;
   }
   const newStatus = await win.webContents.executeJavaScript(
     `this.GetCurrentUserStatusInterface().GetPersonaState();`
@@ -197,6 +197,15 @@ function clearLocalStorageMenuItem(win) {
   };
 }
 
+function loadURLMenuItem(win, label, url) {
+  return {
+    label: label,
+    click: function () {
+      win.loadURL(url);
+    },
+  };
+}
+
 function quitMenuItem() {
   return {
     label: "Quit",
@@ -207,13 +216,37 @@ function quitMenuItem() {
   };
 }
 
+function createSubmenu(win, label, items) {
+  return {
+    label: label,
+    submenu: items.map(item => {
+      if (item.url) {
+        return loadURLMenuItem(win, item.label, item.url);
+      } else if (item.action === 'clearLocalStorage') {
+        return clearLocalStorageMenuItem(win);
+      } else {
+        return item;
+      }
+    }),
+  };
+}
+
 function createContextMenu(win) {
+  const debugItems = [
+    loadURLMenuItem(win, 'Return to Chat', 'https://steamcommunity.com/chat'),
+    clearLocalStorageMenuItem(win),
+  ];
+
   const menuItems = [
     toggleWindowMenuItem(win),
+    { type: 'separator' },
+    createSubmenu(win, 'Debug', debugItems),
+    { type: 'separator' },
+    { label: 'Status', enabled: false },
     statusMenuItem(win, "Online"),
     statusMenuItem(win, "Away"),
     statusMenuItem(win, "Invisible"),
-    clearLocalStorageMenuItem(win),
+    { type: 'separator' },
     quitMenuItem(),
   ];
 
@@ -221,21 +254,23 @@ function createContextMenu(win) {
   return { contextMenu, menuItems };
 }
 
+let lastTooltip = '';
+
 function handleTrayTooltip(win, tray) {
   setInterval(() => {
-    // Check if the current URL is 'https://steamcommunity.com/login/home/?goto=%2Fchat'
-    if (win.webContents.getURL() === 'https://steamcommunity.com/login/home/?goto=%2Fchat') {
-      return; // If it is, exit the function
+    // Exit the function if URL is not 'https://steamcommunity.com/chat'
+    if (win.webContents.getURL() !== 'https://steamcommunity.com/chat') {
+      return;
     }
     win.webContents
       .executeJavaScript(
         "this.g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;"
       )
       .then((persona_name) => {
-        if (persona_name) {
-          tray.setToolTip(`${persona_name} - steamchat`);
-        } else {
-          tray.setToolTip("steamchat");
+        const newTooltip = persona_name ? `${persona_name} - steamchat` : 'steamchat';
+        if (newTooltip !== lastTooltip) {
+          tray.setToolTip(newTooltip);
+          lastTooltip = newTooltip;
         }
       })
       .catch((error) => {
