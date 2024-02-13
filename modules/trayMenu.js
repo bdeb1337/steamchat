@@ -29,6 +29,7 @@ function initMenuItems(win, tray) {
     toggleConfigMenuItem("Minimize on Close", "minimize_on_close", win, tray),
     toggleConfigMenuItem("Minimize to Tray", "minimize_to_tray", win, tray),
     toggleConfigMenuItem("Start Minimized", "start_minimized", win, tray),
+    toggleConfigMenuItem("Launch on Startup", "launch_on_startup", win, tray),
   ];
 
   // Set the menu items
