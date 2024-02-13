@@ -2,6 +2,9 @@
 const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 
+// Import the config object
+const config = require("./config.js");
+
 // Function to set web preferences for the BrowserWindow
 function setWebPreferences() {
   return {
@@ -18,7 +21,7 @@ function createBrowserWindow() {
     width: 800,
     height: 600,
     icon: path.join(__dirname, "assets", "icon.png"),
-    show: false, // Hide the window initially
+    show: !config.get("start_minimized"), // Show the window if start_minimized is false
     webPreferences: setWebPreferences(), // Set the web preferences
   });
 
@@ -74,17 +77,21 @@ function handleWindowEvents(win) {
 
   // Prevent the window from being closed, instead hide it
   win.on("close", function (event) {
-    if (!app.isQuiting) {
+    if (!app.isQuiting && config.get("minimize_on_close")) {
       event.preventDefault();
       hideWindow(win);
+    }else{
+      app.quit();
     }
     return false;
   });
 
   // Prevent the window from being minimized, instead hide it
   win.on("minimize", function (event) {
-    event.preventDefault();
-    hideWindow(win);
+    if (config.get("minimize_to_tray")) {
+      event.preventDefault();
+      hideWindow(win);
+    }
   });
 }
 

@@ -1,8 +1,51 @@
 // Import necessary modules from Electron and the path module for handling file paths
 const { app, Menu, Tray } = require("electron");
 const path = require("path");
-const isMac = process.platform === "darwin"; // Check if the platform is macOS
-const { toggleWindow } = require("./browserWindow.js"); // Import the toggleWindow function
+
+// Check if the platform is macOS
+const isMac = process.platform === "darwin";
+
+// Import the toggleWindow function
+const { toggleWindow } = require("./browserWindow.js");
+
+// Import the config object
+const config = require("./config.js");
+
+// Create a variable to hold the tray object
+let tray = null;
+
+// Create a variable to hold the menu items
+let menuItems = [];
+
+// Function to initialize the menu items
+function initMenuItems(win, tray) {
+  // Define the menu items
+  const debugItems = [
+    loadURLMenuItem(win, "Return to Chat", "https://steamcommunity.com/chat"),
+    clearLocalStorageMenuItem(win),
+  ];
+
+  const settingsItems = [
+    toggleConfigMenuItem("Minimize on Close", "minimize_on_close", win, tray),
+    toggleConfigMenuItem("Minimize to Tray", "minimize_to_tray", win, tray),
+    toggleConfigMenuItem("Start Minimized", "start_minimized", win, tray),
+  ];
+
+  // Set the menu items
+  menuItems = [
+    toggleWindowMenuItem(win),
+    { type: "separator" },
+    createSubmenu(win, "Debug", debugItems),
+    createSubmenu(win, "Settings", settingsItems),
+    { type: "separator" },
+    { label: "Status", enabled: false },
+    statusMenuItem(win, "Online"),
+    statusMenuItem(win, "Away"),
+    statusMenuItem(win, "Invisible"),
+    { type: "separator" },
+    quitMenuItem(),
+  ];
+}
 
 // Function to create a menu item that toggles the window
 function toggleWindowMenuItem(win) {
@@ -50,11 +93,11 @@ async function getNewStatus(win) {
 
 // Function to update the status labels in the menu items
 function updateStatusLabels(menuItems, newStatus) {
-  for (const item of menuItems) {
-    if (item.label === statusMap[newStatus]) {
-      item.label = `• ${item.label}`; // Add dot indicator to the current status
-    } else {
-      item.label = item.label.replace("• ", ""); // Remove dot indicator from other statuses
+  for (let i = 0; i < menuItems.length; i++) {
+    if (menuItems[i].label === statusMap[newStatus]) {
+      menuItems[i].label = `• ${menuItems[i].label}`; // Add dot indicator to the current status
+    } else if (menuItems[i].label && menuItems[i].label.startsWith("• ")) {
+      menuItems[i].label = menuItems[i].label.replace("• ", ""); // Remove dot indicator from other statuses
     }
   }
 }
@@ -66,7 +109,7 @@ function rebuildContextMenu(menuItems) {
 }
 
 // Function to update the menu labels
-async function updateMenuLabels(win, menuItems) {
+async function updateMenuLabels(win) {
   const newStatus = await getNewStatus(win);
 
   // If the new status is not null and is different from the current status, update the labels
@@ -111,6 +154,32 @@ function quitMenuItem() {
   };
 }
 
+// Function to toggle a configuration option and return the new state
+function toggleConfigOption(key) {
+  const currentState = config.get(key);
+  const newState = !currentState;
+  config.set(key, newState);
+  return newState;
+}
+
+// Function to create a menu item that toggles a configuration option
+function toggleConfigMenuItem(label, key, win, tray) {
+  const menuItem = {
+    label: label,
+    type: "checkbox",
+    checked: config.get(key),
+    click: function () {
+      const newState = toggleConfigOption(key);
+      menuItem.checked = newState; // Update the checked property with the new state
+
+      const { contextMenu } = createContextMenu(win, tray); // Re-create the context menu
+      tray.setContextMenu(contextMenu); // Set the updated context menu on the tray
+    },
+  };
+
+  return menuItem;
+}
+
 // Function to create a submenu
 function createSubmenu(win, label, items) {
   return {
@@ -128,25 +197,10 @@ function createSubmenu(win, label, items) {
 }
 
 // Function to create the context menu
-function createContextMenu(win) {
-  const debugItems = [
-    loadURLMenuItem(win, "Return to Chat", "https://steamcommunity.com/chat"),
-    clearLocalStorageMenuItem(win),
-  ];
-
-  const menuItems = [
-    toggleWindowMenuItem(win),
-    { type: "separator" },
-    createSubmenu(win, "Debug", debugItems),
-    { type: "separator" },
-    { label: "Status", enabled: false },
-    statusMenuItem(win, "Online"),
-    statusMenuItem(win, "Away"),
-    statusMenuItem(win, "Invisible"),
-    { type: "separator" },
-    quitMenuItem(),
-  ];
-
+function createContextMenu(win, tray) {
+  if (menuItems.length === 0) {
+    initMenuItems(win, tray);
+  }
   const contextMenu = Menu.buildFromTemplate(menuItems);
   return { contextMenu, menuItems };
 }
@@ -182,20 +236,29 @@ function handleTrayTooltip(win, tray) {
 // Function to create the tray
 function createTray(win) {
   tray = new Tray(
-    path.join(__dirname, "..", "assets", isMac ? "macTrayIcon@2x.png" : "icon.png")
+    path.join(
+      __dirname,
+      "..",
+      "assets",
+      isMac ? "macTrayIcon@2x.png" : "icon.png"
+    )
   );
-  const { contextMenu } = createContextMenu(win);
+
+  const { contextMenu, menuItems } = createContextMenu(win, tray);
   tray.setContextMenu(contextMenu);
   handleTrayTooltip(win, tray);
 
   tray.on("click", () => {
     toggleWindow(win); // Toggle the window when the tray is clicked
   });
+
+  // Update the menu labels every second
+  setInterval(() => {
+    updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
+  }, 1000);
 }
 
 // Export the functions for use in other modules
 module.exports = {
-    createTray,
-    createContextMenu,
-    updateMenuLabels,
+  createTray
 };
