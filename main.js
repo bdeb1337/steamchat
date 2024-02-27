@@ -1,9 +1,6 @@
 // Import necessary modules from Electron
 const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 
-// Import the autoUpdater module
-require("./modules/autoUpdater.js");
-
 // Import functions from the browserWindow and trayMenu modules
 const {
   createBrowserWindow,
