@@ -23,6 +23,9 @@ const config = require("./modules/config.js");
 // Import the path module for handling file paths
 const path = require("path");
 
+// Initialise the tray variable
+let tray = null;
+
 // Check if the app is running on a Mac
 const isMac = process.platform === "darwin";
 
@@ -38,7 +41,7 @@ function createWindow() {
   handleWindowEvents(win);
 
   // Create the tray icon
-  createTray(win);
+  tray = createTray(win);
 }
 
 // When the app is ready, create a window and hide the dock if on a Mac
@@ -71,7 +74,9 @@ app.on("before-quit", () => {
   // Set app.isQuiting to true
   app.isQuiting = true;
   // Destroy the tray icon
-  tray.destroy();
+  if (tray){
+    tray.destroy();
+  }
 });
 
 // Handle the 'notify' event
