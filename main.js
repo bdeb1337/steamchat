@@ -6,6 +6,7 @@ const {
   createBrowserWindow,
   removeDefaultElectronMenu,
   handleWindowEvents,
+  hideWindow,
 } = require("./modules/browserWindow.js");
 
 const {
@@ -20,6 +21,9 @@ const config = require("./modules/config.js");
 // Import the path module for handling file paths
 const path = require("path");
 
+// Initialise the win variable
+let win = null;
+
 // Initialise the tray variable
 let tray = null;
 
@@ -29,7 +33,7 @@ const isMac = process.platform === "darwin";
 // Function to create a new window
 function createWindow() {
   // Create a new BrowserWindow
-  const win = createBrowserWindow();
+  win = createBrowserWindow();
 
   // Remove the default Electron menu
   removeDefaultElectronMenu(win);
@@ -45,8 +49,8 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
   // If the app is running on a Mac and the start_minimized configuration option is true, hide the dock
-  if (isMac && config.start_minimized) {
-    app.dock.hide();
+  if (isMac && config.get('start_minimized')) {
+    hideWindow(win);
   }
 });
 

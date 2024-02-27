@@ -98,9 +98,9 @@ function handleWindowEvents(win) {
 // Function to toggle the visibility of the window
 function toggleWindow(win) {
   if (win.isVisible()) {
-    win.hide();
+    hideWindow(win);
   } else {
-    win.show();
+    showWindow(win);
   }
 }
 
