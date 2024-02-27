@@ -1,5 +1,6 @@
 // Import necessary modules from Electron and the path module for handling file paths
 const { app, Menu, Tray } = require("electron");
+const os = require("os");
 const path = require("path");
 
 // Check if the platform is macOS
@@ -250,7 +251,9 @@ function createTray(win) {
   handleTrayTooltip(win, tray);
 
   tray.on("click", () => {
-    toggleWindow(win); // Toggle the window when the tray is clicked
+    if (os.platform() !== "darwin") {
+      toggleWindow(win); // Toggle the window when the tray is clicked
+    }
   });
 
   // Update the menu labels every second
