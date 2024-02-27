@@ -69,7 +69,6 @@
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
-    "electron-updater": "^6.1.7",
     "js-yaml": "^4.1.0"
   }
 }
