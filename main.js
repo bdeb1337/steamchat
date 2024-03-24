@@ -94,11 +94,7 @@ ipcMain.on("notify", (event, { title, opt }) => {
 
   // When the notification is clicked, focus the window
   notification.on("click", () => {
-    const win = BrowserWindow.getAllWindows()[0];
-    // If there is a window and it's minimized, restore it and focus it
-    if (win) {
-      if (win.isMinimized()) win.restore();
-      win.focus();
-    }
+    // Use the exposed showWindow function
+    showWindow(win);
   });
 });
