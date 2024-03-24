@@ -235,6 +235,28 @@ function handleTrayTooltip(win, tray) {
   }, 10000);
 }
 
+// Function to monitor if steamchat is still connected
+function monitorConnection(win) {
+  setInterval(() => {
+    // Exit the function if URL is not 'https://steamcommunity.com/chat'
+    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+      return;
+    }
+    win.webContents
+    .executeJavaScript(`
+      var output = this.g_FriendsUIApp.m_CMInterface.m_bConnected;
+      if (!output) {
+        console.log("Disconnected from Steam Chat. Reloading...");
+        window.location.reload();
+      }
+      output;
+    `)
+    .catch((error) => {
+      console.error("An error occurred:", error);
+    });
+  }, 5000);
+}
+
 // Function to create the tray
 function createTray(win) {
   tray = new Tray(
@@ -260,6 +282,9 @@ function createTray(win) {
   setInterval(() => {
     updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
   }, 1000);
+
+  // Run the monitorConnection function to check if steamchat is still connected
+  monitorConnection(win);
 }
 
 // Export the functions for use in other modules
