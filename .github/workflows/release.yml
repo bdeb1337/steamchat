@@ -64,6 +64,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Flatpak
+        run: |
+          sudo apt update
+          sudo apt install -y flatpak
+
       - name: Build app
         run: npm run build:linux
         env:
