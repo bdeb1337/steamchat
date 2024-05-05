@@ -253,6 +253,8 @@ function monitorConnection(win) {
     `)
     .catch((error) => {
       console.error("An error occurred:", error);
+      console.log("Reloading...");
+      win.webContents.reload();
     });
   }, 5000);
 }
