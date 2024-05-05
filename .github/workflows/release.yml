@@ -67,7 +67,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y flatpak flatpak-builder bsdtar
+          sudo apt install -y flatpak flatpak-builder libarchive-tools
 
       - name: Build app
         run: npm run build:linux
