@@ -67,19 +67,19 @@
         "deb",
         "rpm",
         "pacman"
-      ],
-      "flatpak": {
-        "runtime": "org.freedesktop.Platform",
-        "runtimeVersion": "20.08",
-        "sdk": "org.freedesktop.Sdk",
-        "finishArgs": [
-          "--share=ipc",
-          "--socket=x11",
-          "--socket=pulseaudio",
-          "--share=network",
-          "--device=dri"
-        ]
-      }
+      ]
+    },
+    "flatpak": {
+      "runtime": "org.freedesktop.Platform",
+      "runtimeVersion": "20.08",
+      "sdk": "org.freedesktop.Sdk",
+      "finishArgs": [
+        "--share=ipc",
+        "--socket=x11",
+        "--socket=pulseaudio",
+        "--share=network",
+        "--device=dri"
+      ]
     }
   },
   "devDependencies": {
