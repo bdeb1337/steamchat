@@ -24,7 +24,8 @@
     "appId": "com.bdeb1337.steamchat",
     "mac": {
       "icon": "assets/icon.icns",
-      "category": "public.app-category.social-networking"
+      "category": "public.app-category.social-networking",
+      "arch": ["x64", "arm64"]
     },
     "win": {
       "icon": "assets/icon.ico",
@@ -53,8 +54,10 @@
       "icon": "assets/icons",
       "target": [
         "AppImage",
+        "flatpak",
         "deb",
-        "rpm"
+        "rpm",
+        "pacman"
       ]
     },
     "publish": {
