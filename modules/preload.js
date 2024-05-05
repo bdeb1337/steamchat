@@ -4,6 +4,9 @@ const { ipcRenderer, contextBridge } = require("electron");
 contextBridge.exposeInMainWorld('electron', {
   openExternal: (url) => {
     ipcRenderer.send('open-external', url);
+  },
+  sendNotificationClick: () => {
+    ipcRenderer.send('notification-click');
   }
 });
 
@@ -74,12 +77,41 @@ window.addEventListener("DOMContentLoaded", () => {
   // Start observing the document with the configured parameters
   observer.observe(document, { childList: true, subtree: true });
 
-  // Forward web notifications to the main process
-  const OldNotify = window.Notification;
-  const newNotify = function (title, opt) {
-    ipcRenderer.send("notify", { title, opt });
-    return new OldNotify(title, opt);
-  };
-  newNotify.requestPermission = OldNotify.requestPermission.bind(OldNotify);
-  window.Notification = newNotify;
+  // Notification intercepting
+  // This function will be stringified and injected into the page.
+  function interceptNotifications(onclick) {
+    // Save the original Notification function.
+    const OriginalNotification = Notification;
+
+    // Define a new Notification function.
+    const NewNotification = function(title, options) {
+      // Create the notification using the original function.
+      const notification = new OriginalNotification(title, options);
+
+      // Add an event listener for the click event.
+      notification.onclick = onclick;
+
+      return notification;
+    };
+
+    // Copy the prototype of the original Notification function to the new one.
+    NewNotification.prototype = OriginalNotification.prototype;
+
+    // Copy the permission property of the original Notification function to the new one.
+    Object.defineProperty(NewNotification, 'permission', {
+      get: () => OriginalNotification.permission,
+    });
+
+    // Copy the requestPermission method of the original Notification function to the new one.
+    NewNotification.requestPermission = OriginalNotification.requestPermission.bind(OriginalNotification);
+
+    // Replace the native Notification function with the new one.
+    Notification = NewNotification;
+  }
+
+  // Convert the function to a string and inject it into the page.
+  const script = document.createElement('script');
+  script.textContent = '(' + interceptNotifications.toString() + ')(window.electron.sendNotificationClick);';
+  (document.head || document.documentElement).appendChild(script);
+  script.remove();
 });

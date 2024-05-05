@@ -7,11 +7,10 @@ const {
   removeDefaultElectronMenu,
   handleWindowEvents,
   hideWindow,
+  showWindow,
 } = require("./modules/browserWindow.js");
 
 const {
-  createContextMenu,
-  updateMenuLabels,
   createTray,
 } = require("./modules/trayMenu.js");
 
@@ -80,25 +79,14 @@ app.on("before-quit", () => {
   }
 });
 
-// Handle the 'notify' event
-ipcMain.on("notify", (event, { title, opt }) => {
-  // Create a new notification
-  const notification = new Notification({
-    title: title,
-    body: opt.body,
-    icon: path.join(__dirname, "assets", "logo.png"),
-  });
-
-  // Show the notification
-  notification.show();
-
-  // When the notification is clicked, focus the window
-  notification.on("click", () => {
-    // Use the exposed showWindow function
-    showWindow(win);
-  });
+// When a notification is clicked, show the window
+ipcMain.on('notification-click', () => {
+  // Handle the notification click event here.
+  console.log('Notification clicked!');
+  showWindow(win);
 });
 
+// When an open-external event is received, open the URL in the default browser
 ipcMain.on('open-external', (event, url) => {
   shell.openExternal(url);
 });
