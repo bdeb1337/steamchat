@@ -81,8 +81,6 @@ app.on("before-quit", () => {
 
 // When a notification is clicked, show the window
 ipcMain.on('notification-click', () => {
-  // Handle the notification click event here.
-  console.log('Notification clicked!');
   showWindow(win);
 });
 

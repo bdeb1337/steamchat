@@ -19,34 +19,58 @@ const defaultConfig = {
 
 let config;
 
-// Function to load the configuration
+// Functions to load the configuration
 function loadConfig() {
-  // Check if the config file exists
-  if (fs.existsSync(configPath)) {
-    // If it exists, read it and check if it has the same keys as the default configuration
-    try {
-      config = yaml.load(fs.readFileSync(configPath, "utf8"));
-      const configKeys = Object.keys(config);
-      const defaultKeys = Object.keys(defaultConfig);
-      const missingKeys = defaultKeys.filter((key) => !configKeys.includes(key));
-      if (missingKeys.length > 0) {
-        // If it's missing keys, add them to the config and write the file
-        missingKeys.forEach((key) => {
-          config[key] = defaultConfig[key];
-        });
-        fs.writeFileSync(configPath, yaml.dump(config), "utf8");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  if (configFileExists()) {
+    loadExistingConfig();
   } else {
-    // If it doesn't exist, create it with the default configuration
-    try {
-      fs.writeFileSync(configPath, yaml.dump(defaultConfig), "utf8");
-      config = defaultConfig;
-    } catch (e) {
-      console.error(e);
-    }
+    createNewConfig();
+  }
+}
+
+function configFileExists() {
+  return fs.existsSync(configPath);
+}
+
+function loadExistingConfig() {
+  try {
+    config = yaml.load(fs.readFileSync(configPath, "utf8"));
+    updateConfigWithMissingKeys();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function updateConfigWithMissingKeys() {
+  const missingKeys = getMissingKeys();
+  if (missingKeys.length > 0) {
+    addMissingKeysToConfig(missingKeys);
+    writeConfigToFile();
+  }
+}
+
+function getMissingKeys() {
+  const configKeys = Object.keys(config);
+  const defaultKeys = Object.keys(defaultConfig);
+  return defaultKeys.filter((key) => !configKeys.includes(key));
+}
+
+function addMissingKeysToConfig(missingKeys) {
+  missingKeys.forEach((key) => {
+    config[key] = defaultConfig[key];
+  });
+}
+
+function writeConfigToFile() {
+  fs.writeFileSync(configPath, yaml.dump(config), "utf8");
+}
+
+function createNewConfig() {
+  try {
+    fs.writeFileSync(configPath, yaml.dump(defaultConfig), "utf8");
+    config = defaultConfig;
+  } catch (e) {
+    console.error(e);
   }
 }
 
