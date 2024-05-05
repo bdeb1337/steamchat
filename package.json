@@ -60,20 +60,26 @@
     },
     "linux": {
       "icon": "assets/icons",
+      "category": "Network;Chat;",
       "target": [
         "AppImage",
         "flatpak",
         "deb",
         "rpm",
         "pacman"
-      ]
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "bdeb1337",
-      "repo": "steamchat",
-      "releaseType": "draft",
-      "publishAutoUpdate": true
+      ],
+      "flatpak": {
+        "runtime": "org.freedesktop.Platform",
+        "runtimeVersion": "20.08",
+        "sdk": "org.freedesktop.Sdk",
+        "finishArgs": [
+          "--share=ipc",
+          "--socket=x11",
+          "--socket=pulseaudio",
+          "--share=network",
+          "--device=dri"
+        ]
+      }
     }
   },
   "devDependencies": {
