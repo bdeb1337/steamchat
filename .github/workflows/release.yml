@@ -67,7 +67,7 @@ jobs:
       - name: Install Flatpak
         run: |
           sudo apt update
-          sudo apt install -y flatpak
+          sudo apt install -y flatpak flatpak-builder
 
       - name: Build app
         run: npm run build:linux
