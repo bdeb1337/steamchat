@@ -63,22 +63,9 @@
       "category": "Network;Chat;",
       "target": [
         "AppImage",
-        "flatpak",
         "deb",
         "rpm",
         "pacman"
-      ]
-    },
-    "flatpak": {
-      "runtime": "org.freedesktop.Platform",
-      "runtimeVersion": "20.08",
-      "sdk": "org.freedesktop.Sdk",
-      "finishArgs": [
-        "--share=ipc",
-        "--socket=x11",
-        "--socket=pulseaudio",
-        "--share=network",
-        "--device=dri"
       ]
     }
   },
