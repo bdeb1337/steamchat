@@ -12,6 +12,7 @@ function setWebPreferences() {
     contextIsolation: true, // Protect against prototype pollution
     enableRemoteModule: false, // Turn off remote module
     preload: path.join(__dirname, "preload.js"), // Use a preload script
+    devTools: process.env.NODE_ENV !== 'production', // Disable devTools in production
   };
 }
 

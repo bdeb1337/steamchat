@@ -266,7 +266,7 @@ function createTray(win) {
       __dirname,
       "..",
       "assets",
-      isMac ? "macTrayIcon@2x.png" : "icon.png"
+      isMac ? "macTrayIcon@2x.png" : "trayIcon.png"
     )
   );
 
