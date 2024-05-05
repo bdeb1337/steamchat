@@ -28,7 +28,25 @@ function createBrowserWindow() {
   // Load the initial URL
   win.loadURL("https://steamcommunity.com/chat");
 
+  // When the window is ready, disable next-page and previous-page mouse buttons
+  win.webContents.on('dom-ready', () => {
+    disableMouseNavigation(win);
+  });
+
   return win;
+}
+
+// Function to disable mouse navigation
+function disableMouseNavigation(win) {
+  const disableNavigationScript = `
+    document.addEventListener('mouseup', (event) => {
+      if (event.button === 3 || event.button === 4) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    });
+  `;
+  win.webContents.executeJavaScript(disableNavigationScript);
 }
 
 // Function to remove the default Electron menu
