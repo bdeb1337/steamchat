@@ -1,6 +1,6 @@
 {
   "name": "steamchat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "a webwrapper for steam chat",
   "author": {
     "name": "bdeb1337",
@@ -28,7 +28,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     },
