@@ -1,5 +1,5 @@
 // Import necessary modules from Electron
-const { app, BrowserWindow, ipcMain, Notification } = require("electron");
+const { app, BrowserWindow, ipcMain, Notification, shell } = require("electron");
 
 // Import functions from the browserWindow and trayMenu modules
 const {
@@ -97,4 +97,8 @@ ipcMain.on("notify", (event, { title, opt }) => {
     // Use the exposed showWindow function
     showWindow(win);
   });
+});
+
+ipcMain.on('open-external', (event, url) => {
+  shell.openExternal(url);
 });

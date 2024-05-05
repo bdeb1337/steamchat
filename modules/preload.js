@@ -1,5 +1,11 @@
 // Import ipcRenderer from Electron
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, contextBridge } = require("electron");
+
+contextBridge.exposeInMainWorld('electron', {
+  openExternal: (url) => {
+    ipcRenderer.send('open-external', url);
+  }
+});
 
 // Add an event listener for the DOMContentLoaded event
 window.addEventListener("DOMContentLoaded", () => {

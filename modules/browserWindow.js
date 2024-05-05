@@ -33,7 +33,34 @@ function createBrowserWindow() {
     disableMouseNavigation(win);
   });
 
+  // Control link navigation
+  controlLinkNavigation(win, true);
+
   return win;
+}
+
+// Function to control link navigation
+function controlLinkNavigation(win, shouldOpenExternally) {
+  if (shouldOpenExternally) {
+    // Open external links in the default browser
+    win.webContents.on('dom-ready', () => {
+      win.webContents.executeJavaScript(`
+        const originalOpen = window.open;
+        window.open = (url) => {
+          if (url.includes('steampowered.com') || url.includes('steamcommunity.com')) {
+            // Open steampowered.com and steamcommunity.com URLs internally
+            originalOpen(url, '_self');
+            return true;
+          } else {
+            // Open other URLs externally
+            electron.openExternal(url);
+            return false;
+          }
+        };
+        null;
+        `).catch(error => console.error('Error executing JavaScript:', error));
+    });
+  }
 }
 
 // Function to disable mouse navigation
@@ -132,4 +159,5 @@ module.exports = {
   showWindow,
   handleWindowEvents,
   toggleWindow,
+  controlLinkNavigation,
 };
