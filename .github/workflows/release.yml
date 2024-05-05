@@ -61,13 +61,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install npm dependencies
         run: npm ci
 
-      - name: Install Flatpak
+      - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y flatpak flatpak-builder
+          sudo apt install -y flatpak flatpak-builder bsdtar
 
       - name: Build app
         run: npm run build:linux
