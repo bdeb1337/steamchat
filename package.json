@@ -1,6 +1,6 @@
 {
   "name": "steamchat",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "a webwrapper for steam chat",
   "author": {
     "name": "bdeb1337",
@@ -25,7 +25,10 @@
     "mac": {
       "icon": "assets/icon.icns",
       "category": "public.app-category.social-networking",
-      "arch": ["x64", "arm64"]
+      "arch": [
+        "x64",
+        "arm64"
+      ]
     },
     "win": {
       "icon": "assets/icon.ico",
