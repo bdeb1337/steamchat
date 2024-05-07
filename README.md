@@ -18,48 +18,29 @@ Steamchat is an electron web wrapper for **Steam Chat** (https://steamcommunity.
 ## features
 
 - *steamchat* primarily operates from the system tray. You can access it by clicking the steamchat icon and selecting the **toggle window** button.
-    - **Starts** in the system tray.
-    - **Closes** to tray.
-    - **Minimises** to tray.
+- **Configurable application behaviour** by right clicking the tray icon and selecting **settings**.
+  - **Minimize on Close** - Minimize the application to the system tray when the close button isclicked.
+  - **Minimize to Tray** - Minimize the application to the system tray when the minimize button isclicked.
+  - **Start Minimized** - Start the application minimized to the system tray.
+  - **Launch on Startup** - Start the application when the system starts.
 - System notifications: steamchat integrates with your **system's native notifications**.
 - **Update status**: You can update your status directly from the tray menu.
 - **Simplified navigation**: Some navigation from the steamcommunity has been replaced, leaving only a **STEAM header logo** that returns you to the main chat dialog.
-
+- **Automatic reconnection**: steamchat will automatically reconnect if you lose your connection.
 
 ## installation
 
-You can download the latest version of steamchat from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
+### Manually
 
-### macOS
-
-1. Download the `steamchat-x.x.x.dmg` file from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
-2. Open the `steamchat-x.x.x.dmg` file and drag the steamchat app into your Applications folder.
-
-### Linux
-
-#### AppImage
-1. Download the `steamchat_x.x.x.AppImage` file from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
-2. Make it executable by running `chmod +x steamchat_x.x.x.AppImage` in your terminal. You can then run the app by double-clicking the `steamchat_x.x.x.AppImage` file.
-
-#### debian-based
-1. Download the `steamchat_x.x.x_amd64.deb` file from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
-2. Install it by running `sudo dpkg -i steamchat_x.x.x_amd64.deb` in your terminal.
-
-#### redhat-based
-1. Download the `steamchat-x.x.x.x86-64.rpm` file from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
-2. Install it by running `sudo rpm -i steamchat-x.x.x.x86-64.rpm` in your terminal.
+You can download the latest version of steamchat from the [releases](https://github.com/bdeb1337/steamchat/releases/latest) page and install it manually.
 
 ### Windows
 
-#### Installer
-1. Download the `steamchat-Setup-x.x.x.exe` file from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
-2. Run the `steamchat-Setup-x.x.x.exe` file. This will install steamchat and automatically add a shortcut to your desktop.
-
-#### Portable
-1. Download the `steamchat-x.x.x.exe` file from the [Latest Release](https://github.com/bdeb1337/steamchat/releases/latest) page.
-2. Run the `steamchat-x.x.x.exe` file. This will start steamchat without installing it.
-
-Remember to replace `x.x.x` with the version number you downloaded.
+#### scoop
+```shell
+scoop bucket add bdeb-bucket https://github.com/bdeb1337/bdeb-bucket
+scoop install steamchat
+```
 
 # contributing
 Contributions are welcome! If you have a feature request, bug report, or want to improve the app, feel free to open an issue or submit a pull request.
