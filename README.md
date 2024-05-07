@@ -13,17 +13,17 @@
 
 <h1 align="center">steamchat</h1>
 
-Steamchat is an electron web wrapper for **Steam Chat** (https://steamcommunity.com/chat), designed primarily to replace the Steam Chat experience on macOS with the official Steam client, which I did not like. It is also available for Windows and Linux.
+Steamchat is an electron web wrapper for **Steam Chat** (https://steamcommunity.com/chat), designed primarily to replace the Steam Chat experience on macOS with the official Steam client. It is also available for Windows and Linux.
 
 ## features
 
-- *steamchat* primarily operates from the system tray. You can access it by clicking the steamchat icon and selecting the **toggle window** button.
+- **steamchat** primarily operates from the system tray. You can access it by clicking the steamchat icon and selecting the **toggle window** button.
 - **Configurable application behaviour** by right clicking the tray icon and selecting **settings**.
   - **Minimize on Close** - Minimize the application to the system tray when the close button isclicked.
   - **Minimize to Tray** - Minimize the application to the system tray when the minimize button isclicked.
   - **Start Minimized** - Start the application minimized to the system tray.
   - **Launch on Startup** - Start the application when the system starts.
-- System notifications: steamchat integrates with your **system's native notifications**.
+- **System notifications**: steamchat integrates with your **system's native notifications**.
 - **Update status**: You can update your status directly from the tray menu.
 - **Simplified navigation**: Some navigation from the steamcommunity has been replaced, leaving only a **STEAM header logo** that returns you to the main chat dialog.
 - **Automatic reconnection**: steamchat will automatically reconnect if you lose your connection.
@@ -34,13 +34,24 @@ Steamchat is an electron web wrapper for **Steam Chat** (https://steamcommunity.
 
 You can download the latest version of steamchat from the [releases](https://github.com/bdeb1337/steamchat/releases/latest) page and install it manually.
 
+### macOS
+
+#### Homebrew
+
+```shell
+brew tap bdeb1337/bdeb1337
+brew install --cask steamchat
+```
+
 ### Windows
 
 #### scoop
+
 ```shell
 scoop bucket add bdeb-bucket https://github.com/bdeb1337/bdeb-bucket
 scoop install steamchat
 ```
 
 # contributing
+
 Contributions are welcome! If you have a feature request, bug report, or want to improve the app, feel free to open an issue or submit a pull request.
