@@ -24,6 +24,10 @@
     "appId": "com.bdeb1337.steamchat",
     "mac": {
       "icon": "assets/icon.icns",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Mic access is required for notification sounds.",
+        "com.apple.security.device.microphone": true
+    },
       "category": "public.app-category.social-networking",
       "target": [
         {

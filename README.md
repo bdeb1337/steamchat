@@ -43,6 +43,15 @@ brew tap bdeb1337/bdeb1337
 brew install --cask steamchat
 ```
 
+Since code signing is not yet implemented but needed for notifications/audio you will need to self-sign the app:
+
+```shell
+# generate a self-signed certificate cref. 
+# https://www.simplified.guide/macos/keychain-cert-code-signing-create 
+# and https://support.apple.com/guide/keychain-access/create-self-signed-certificates-kyca8916/mac
+codesign --deep --force --verify --verbose --sign "Your Certificate" /Applications/steamchat.app
+```
+
 ### Windows
 
 #### scoop
