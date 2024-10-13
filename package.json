@@ -1,6 +1,6 @@
 {
   "name": "steamchat",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "a webwrapper for steam chat",
   "author": {
     "name": "bdeb1337",
@@ -27,7 +27,7 @@
       "extendInfo": {
         "NSMicrophoneUsageDescription": "Mic access is required for notification sounds.",
         "com.apple.security.device.microphone": true
-    },
+      },
       "category": "public.app-category.social-networking",
       "target": [
         {
