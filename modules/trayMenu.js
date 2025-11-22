@@ -70,11 +70,14 @@ const statusMap = {
 function statusMenuItem(win, statusLabel, statusCode) {
   return {
     label: statusLabel,
-    click: function () {
-      // Execute JavaScript in the window to set the user status
-      win.webContents.executeJavaScript(
-        `g_FriendsUIApp.FriendStore.SetUserPersonaState(${statusCode});`
-      );
+    click: async function () {
+      try {
+        await win.webContents.executeJavaScript(
+          `g_FriendsUIApp.FriendStore.SetUserPersonaState(${statusCode});`
+        );
+      } catch (error) {
+        console.error(`Failed to set status to ${statusLabel}:`, error);
+      }
     },
   };
 }
@@ -83,14 +86,19 @@ let currentStatus = null; // Variable to hold the current status
 
 // Function to get the new status
 async function getNewStatus(win) {
-  // If the window URL is not the chat URL, return null
-  if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+  try {
+    // If the window URL is not the chat URL, return null
+    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+      return null;
+    }
+    // Execute JavaScript in the window to get the user status
+    return await win.webContents.executeJavaScript(
+      `g_FriendsUIApp.FriendStore.m_eUserPersonaState;`
+    );
+  } catch (error) {
+    console.error("Failed to get user status:", error);
     return null;
   }
-  // Execute JavaScript in the window to get the user status
-  return await win.webContents.executeJavaScript(
-    `g_FriendsUIApp.FriendStore.m_eUserPersonaState;`
-  );
 }
 
 // Function to update the status labels in the menu items
@@ -211,51 +219,50 @@ let lastTooltip = ""; // Variable to hold the last tooltip
 
 // Function to handle the tray tooltip
 function handleTrayTooltip(win, tray) {
-  setInterval(() => {
-    // Exit the function if URL is not 'https://steamcommunity.com/chat'
-    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
-      return;
-    }
-    win.webContents
-      .executeJavaScript(
+  setInterval(async () => {
+    try {
+      // Exit the function if URL is not 'https://steamcommunity.com/chat'
+      if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+        return;
+      }
+      const persona_name = await win.webContents.executeJavaScript(
         "this.g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;"
-      )
-      .then((persona_name) => {
-        const newTooltip = persona_name
-          ? `${persona_name} - steamchat`
-          : "steamchat";
-        if (newTooltip !== lastTooltip) {
-          tray.setToolTip(newTooltip);
-          lastTooltip = newTooltip;
-        }
-      })
-      .catch((error) => {
-        console.error("An error occurred:", error);
-      });
+      );
+      
+      const newTooltip = persona_name
+        ? `${persona_name} - steamchat`
+        : "steamchat";
+      if (newTooltip !== lastTooltip) {
+        tray.setToolTip(newTooltip);
+        lastTooltip = newTooltip;
+      }
+    } catch (error) {
+      console.error("Failed to update tooltip:", error);
+    }
   }, 10000);
 }
 
 // Function to monitor if steamchat is still connected
 function monitorConnection(win) {
-  setInterval(() => {
-    // Exit the function if URL is not 'https://steamcommunity.com/chat'
-    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
-      return;
-    }
-    win.webContents
-    .executeJavaScript(`
-      var output = this.g_FriendsUIApp.m_CMInterface.m_bConnected;
-      if (!output) {
-        console.log("Disconnected from Steam Chat. Reloading...");
-        window.location.reload();
+  setInterval(async () => {
+    try {
+      // Exit the function if URL is not 'https://steamcommunity.com/chat'
+      if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+        return;
       }
-      output;
-    `)
-    .catch((error) => {
-      console.error("An error occurred:", error);
-      console.log("Reloading...");
+      // Execute JavaScript in the window to check the connection status
+      const isConnected = await win.webContents.executeJavaScript(`
+        var output = this.g_FriendsUIApp.m_CMInterface.m_bConnected;
+        if (!output) {
+          console.log("Disconnected from Steam Chat. Reloading...");
+          window.location.assign("https://steamcommunity.com/chat");
+        }
+        output;
+      `);
+    } catch (error) {
+      console.error("Connection check failed. Reloading...", error);
       win.webContents.reload();
-    });
+    }
   }, 5000);
 }
 
