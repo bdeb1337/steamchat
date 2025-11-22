@@ -41,9 +41,9 @@ function initMenuItems(win, tray) {
     createSubmenu(win, "Settings", settingsItems),
     { type: "separator" },
     { label: "Status", enabled: false },
-    statusMenuItem(win, "Online"),
-    statusMenuItem(win, "Away"),
-    statusMenuItem(win, "Invisible"),
+    statusMenuItem(win, "Online", 1),
+    statusMenuItem(win, "Away", 3),
+    statusMenuItem(win, "Invisible", 7),
     { type: "separator" },
     quitMenuItem(),
   ];
@@ -67,13 +67,13 @@ const statusMap = {
 };
 
 // Function to create a menu item that sets the user status
-function statusMenuItem(win, status) {
+function statusMenuItem(win, statusLabel, statusCode) {
   return {
-    label: status,
+    label: statusLabel,
     click: function () {
       // Execute JavaScript in the window to set the user status
       win.webContents.executeJavaScript(
-        `this.GetCurrentUserStatusInterface().SetUser${status}();`
+        `g_FriendsUIApp.FriendStore.SetUserPersonaState(${statusCode});`
       );
     },
   };
@@ -89,7 +89,7 @@ async function getNewStatus(win) {
   }
   // Execute JavaScript in the window to get the user status
   return await win.webContents.executeJavaScript(
-    `this.GetCurrentUserStatusInterface().GetPersonaState();`
+    `g_FriendsUIApp.FriendStore.m_eUserPersonaState;`
   );
 }
 
