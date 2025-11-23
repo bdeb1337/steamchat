@@ -3,6 +3,10 @@ const { app, Menu, Tray } = require("electron");
 const os = require("os");
 const path = require("path");
 
+// Import own modules and constants
+const SteamAPI = require("./steamAPI.js");
+const { PERSONA_STATE, INTERVALS, STEAM_CHAT_URL } = require("./constants.js");
+
 // Check if the platform is macOS
 const isMac = process.platform === "darwin";
 
@@ -41,9 +45,9 @@ function initMenuItems(win, tray) {
     createSubmenu(win, "Settings", settingsItems),
     { type: "separator" },
     { label: "Status", enabled: false },
-    statusMenuItem(win, "Online", 1),
-    statusMenuItem(win, "Away", 3),
-    statusMenuItem(win, "Invisible", 7),
+    statusMenuItem(win, "Online", PERSONA_STATE.ONLINE),
+    statusMenuItem(win, "Away", PERSONA_STATE.AWAY),
+    statusMenuItem(win, "Invisible", PERSONA_STATE.INVISIBLE),
     { type: "separator" },
     quitMenuItem(),
   ];
@@ -61,9 +65,9 @@ function toggleWindowMenuItem(win) {
 
 // Map of status codes to status labels
 const statusMap = {
-  1: "Online",
-  3: "Away",
-  7: "Invisible",
+  [PERSONA_STATE.ONLINE]: "Online",
+  [PERSONA_STATE.AWAY]: "Away",
+  [PERSONA_STATE.INVISIBLE]: "Invisible",
 };
 
 // Function to create a menu item that sets the user status
@@ -73,7 +77,7 @@ function statusMenuItem(win, statusLabel, statusCode) {
     click: async function () {
       try {
         await win.webContents.executeJavaScript(
-          `g_FriendsUIApp.FriendStore.SetUserPersonaState(${statusCode});`
+          SteamAPI.setPersonaState(statusCode)
         );
       } catch (error) {
         console.error(`Failed to set status to ${statusLabel}:`, error);
@@ -84,16 +88,21 @@ function statusMenuItem(win, statusLabel, statusCode) {
 
 let currentStatus = null; // Variable to hold the current status
 
+// Function to check if the window is on the Steam chat page
+function isOnChatPage(win) {
+  return win && !win.isDestroyed() && win.webContents.getURL() === STEAM_CHAT_URL;
+}
+
 // Function to get the new status
 async function getNewStatus(win) {
   try {
     // If the window URL is not the chat URL, return null
-    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+    if (!isOnChatPage(win)) {
       return null;
     }
     // Execute JavaScript in the window to get the user status
     return await win.webContents.executeJavaScript(
-      `g_FriendsUIApp.FriendStore.m_eUserPersonaState;`
+      SteamAPI.getPersonaState()
     );
   } catch (error) {
     console.error("Failed to get user status:", error);
@@ -134,11 +143,13 @@ async function updateMenuLabels(win) {
 function clearLocalStorageMenuItem(win) {
   return {
     label: "Clear Local Storage",
-    click: function () {
-      // Clear the storage data and then reload the window
-      win.webContents.session.clearStorageData().then(() => {
+    click: async function () {
+      try {
+        await win.webContents.session.clearStorageData();
         win.reload();
-      });
+      } catch (error) {
+        console.error("Failed to clear local storage:", error);
+      }
     },
   };
 }
@@ -222,11 +233,11 @@ function handleTrayTooltip(win, tray) {
   setInterval(async () => {
     try {
       // Exit the function if URL is not 'https://steamcommunity.com/chat'
-      if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+      if (!isOnChatPage(win)) {
         return;
       }
       const persona_name = await win.webContents.executeJavaScript(
-        "this.g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;"
+        SteamAPI.getPersonaName()
       );
       
       const newTooltip = persona_name
@@ -239,7 +250,7 @@ function handleTrayTooltip(win, tray) {
     } catch (error) {
       console.error("Failed to update tooltip:", error);
     }
-  }, 10000);
+  }, INTERVALS.TOOLTIP_UPDATE);
 }
 
 // Function to monitor if steamchat is still connected
@@ -247,23 +258,24 @@ function monitorConnection(win) {
   setInterval(async () => {
     try {
       // Exit the function if URL is not 'https://steamcommunity.com/chat'
-      if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+      if (!isOnChatPage(win)) {
         return;
       }
       // Execute JavaScript in the window to check the connection status
-      const isConnected = await win.webContents.executeJavaScript(`
-        var output = this.g_FriendsUIApp.m_CMInterface.m_bConnected;
-        if (!output) {
-          console.log("Disconnected from Steam Chat. Reloading...");
-          window.location.assign("https://steamcommunity.com/chat");
-        }
-        output;
-      `);
+      const isConnected = await win.webContents.executeJavaScript(
+        SteamAPI.isConnected()
+      );
+      
+      if (!isConnected) {
+        console.log("Disconnected from Steam Chat. Reloading...");
+        win.webContents.loadURL(STEAM_CHAT_URL);
+        return;
+      }
     } catch (error) {
       console.error("Connection check failed. Reloading...", error);
       win.webContents.reload();
     }
-  }, 5000);
+  }, INTERVALS.CONNECTION_CHECK);
 }
 
 // Function to create the tray
@@ -290,7 +302,7 @@ function createTray(win) {
   // Update the menu labels every second
   setInterval(() => {
     updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
-  }, 1000);
+  }, INTERVALS.MENU_UPDATE);
 
   // Run the monitorConnection function to check if steamchat is still connected
   monitorConnection(win);

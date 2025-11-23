@@ -2,6 +2,9 @@
 const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 
+// Import constants
+const { STEAM_CHAT_URL } = require("./constants.js");
+
 // Import the config object
 const config = require("./config.js");
 
@@ -27,7 +30,7 @@ function createBrowserWindow() {
   });
 
   // Load the initial URL
-  win.loadURL("https://steamcommunity.com/chat");
+  win.loadURL(STEAM_CHAT_URL);
 
   // When the window is ready, disable next-page and previous-page mouse buttons
   win.webContents.on('dom-ready', () => {
