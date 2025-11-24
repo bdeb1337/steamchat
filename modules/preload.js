@@ -2,9 +2,6 @@
 const { ipcRenderer, contextBridge } = require("electron");
 
 contextBridge.exposeInMainWorld('electron', {
-  openExternal: (url) => {
-    ipcRenderer.send('open-external', url);
-  },
   sendNotificationClick: () => {
     ipcRenderer.send('notification-click');
   }

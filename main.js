@@ -82,8 +82,3 @@ app.on("before-quit", () => {
 ipcMain.on('notification-click', () => {
   showWindow(win);
 });
-
-// When an open-external event is received, open the URL in the default browser
-ipcMain.on('open-external', (event, url) => {
-  shell.openExternal(url);
-});
