@@ -78,13 +78,7 @@ function statusMenuItem(win, statusLabel, statusCode) {
   return {
     label: statusLabel,
     click: async function () {
-      try {
-        await win.webContents.executeJavaScript(
-          SteamAPI.setPersonaState(statusCode)
-        );
-      } catch (error) {
-        console.error(`Failed to set status to ${statusLabel}:`, error);
-      }
+      await SteamAPI.execute(win, SteamAPI.setPersonaState(statusCode));
     },
   };
 }
@@ -98,19 +92,11 @@ function isOnChatPage(win) {
 
 // Function to get the new status
 async function getNewStatus(win) {
-  try {
-    // If the window URL is not the chat URL, return null
-    if (!isOnChatPage(win)) {
-      return null;
-    }
-    // Execute JavaScript in the window to get the user status
-    return await win.webContents.executeJavaScript(
-      SteamAPI.getPersonaState()
-    );
-  } catch (error) {
-    console.error("Failed to get user status:", error);
+  if (!isOnChatPage(win)) {
     return null;
   }
+  
+  return await SteamAPI.execute(win, SteamAPI.getPersonaState());
 }
 
 // Function to update the status labels in the menu items
@@ -234,24 +220,18 @@ let lastTooltip = ""; // Variable to hold the last tooltip
 // Function to handle the tray tooltip
 function handleTrayTooltip(win, tray) {
   intervals.push(setInterval(async () => {
-    try {
-      // Exit the function if URL is not 'https://steamcommunity.com/chat'
-      if (!isOnChatPage(win)) {
-        return;
-      }
-      const persona_name = await win.webContents.executeJavaScript(
-        SteamAPI.getPersonaName()
-      );
-      
-      const newTooltip = persona_name
-        ? `${persona_name} - steamchat`
-        : "steamchat";
-      if (newTooltip !== lastTooltip) {
-        tray.setToolTip(newTooltip);
-        lastTooltip = newTooltip;
-      }
-    } catch (error) {
-      console.error("Failed to update tooltip:", error);
+    if (!isOnChatPage(win)) {
+      return;
+    }
+    
+    const persona_name = await SteamAPI.execute(win, SteamAPI.getPersonaName());
+    
+    const newTooltip = persona_name
+      ? `${persona_name} - steamchat`
+      : "steamchat";
+    if (newTooltip !== lastTooltip) {
+      tray.setToolTip(newTooltip);
+      lastTooltip = newTooltip;
     }
   }, INTERVALS.TOOLTIP_UPDATE));
 }
@@ -259,24 +239,15 @@ function handleTrayTooltip(win, tray) {
 // Function to monitor if steamchat is still connected
 function monitorConnection(win) {
   intervals.push(setInterval(async () => {
-    try {
-      // Exit the function if URL is not 'https://steamcommunity.com/chat'
-      if (!isOnChatPage(win)) {
-        return;
-      }
-      // Execute JavaScript in the window to check the connection status
-      const isConnected = await win.webContents.executeJavaScript(
-        SteamAPI.isConnected()
-      );
-      
-      if (!isConnected) {
-        console.log("Disconnected from Steam Chat. Reloading...");
-        win.webContents.loadURL(STEAM_CHAT_URL);
-        return;
-      }
-    } catch (error) {
-      console.error("Connection check failed. Reloading...", error);
-      win.webContents.reload();
+    if (!isOnChatPage(win)) {
+      return;
+    }
+    
+    const isConnected = await SteamAPI.execute(win, SteamAPI.isConnected());
+    
+    if (isConnected === false) {
+      console.log("Disconnected from Steam Chat. Reloading...");
+      win.webContents.loadURL(STEAM_CHAT_URL);
     }
   }, INTERVALS.CONNECTION_CHECK));
 }
