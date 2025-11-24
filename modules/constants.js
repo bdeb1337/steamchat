@@ -1,24 +1,24 @@
 // Steam persona state codes
-// See: https://partner.steamgames.com/doc/api/ISteamFriends#EPersonaState
+// Reference: https://partner.steamgames.com/doc/api/ISteamFriends#EPersonaState
 const PERSONA_STATE = {
   OFFLINE: 0,
   ONLINE: 1,
-  BUSY: 2,      // Not currently used
+  BUSY: 2,           // Not currently used in UI
   AWAY: 3,
-  SNOOZE: 4,    // Not currently used
-  LOOKING_TO_TRADE: 5,  // Not currently used
-  LOOKING_TO_PLAY: 6,   // Not currently used
+  SNOOZE: 4,         // Not currently used in UI
+  LOOKING_TO_TRADE: 5,  // Not currently used in UI
+  LOOKING_TO_PLAY: 6,   // Not currently used in UI
   INVISIBLE: 7,
 };
 
-// Update intervals in milliseconds
+// Polling intervals in milliseconds
 const INTERVALS = {
-  MENU_UPDATE: 1000,      // How often to check for status changes
-  CONNECTION_CHECK: 5000, // How often to verify Steam connection
-  TOOLTIP_UPDATE: 10000,  // How often to update tray tooltip
+  MENU_UPDATE: 1000,      // How often to check for status changes in menu
+  CONNECTION_CHECK: 5000, // How often to verify Steam connection is alive
+  TOOLTIP_UPDATE: 10000,  // How often to update tray tooltip with persona name
 };
 
-// Steam chat URL
+// Steam chat web application URL
 const STEAM_CHAT_URL = "https://steamcommunity.com/chat";
 
 module.exports = {
