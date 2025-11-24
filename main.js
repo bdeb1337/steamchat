@@ -12,6 +12,7 @@ const {
 
 const {
   createTray,
+  cleanupTray,
 } = require("./modules/trayMenu.js");
 
 // Import the config object
@@ -74,9 +75,7 @@ app.on("before-quit", () => {
   // Set app.isQuiting to true
   app.isQuiting = true;
   // Destroy the tray icon
-  if (tray){
-    tray.destroy();
-  }
+  cleanupTray();
 });
 
 // When a notification is clicked, show the window

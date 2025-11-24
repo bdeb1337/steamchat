@@ -16,6 +16,9 @@ const { toggleWindow } = require("./browserWindow.js");
 // Import the config object
 const config = require("./config.js");
 
+// Create a variable to hold intervals
+const intervals = [];
+
 // Create a variable to hold the tray object
 let tray = null;
 
@@ -230,7 +233,7 @@ let lastTooltip = ""; // Variable to hold the last tooltip
 
 // Function to handle the tray tooltip
 function handleTrayTooltip(win, tray) {
-  setInterval(async () => {
+  intervals.push(setInterval(async () => {
     try {
       // Exit the function if URL is not 'https://steamcommunity.com/chat'
       if (!isOnChatPage(win)) {
@@ -250,12 +253,12 @@ function handleTrayTooltip(win, tray) {
     } catch (error) {
       console.error("Failed to update tooltip:", error);
     }
-  }, INTERVALS.TOOLTIP_UPDATE);
+  }, INTERVALS.TOOLTIP_UPDATE));
 }
 
 // Function to monitor if steamchat is still connected
 function monitorConnection(win) {
-  setInterval(async () => {
+  intervals.push(setInterval(async () => {
     try {
       // Exit the function if URL is not 'https://steamcommunity.com/chat'
       if (!isOnChatPage(win)) {
@@ -275,7 +278,7 @@ function monitorConnection(win) {
       console.error("Connection check failed. Reloading...", error);
       win.webContents.reload();
     }
-  }, INTERVALS.CONNECTION_CHECK);
+  }, INTERVALS.CONNECTION_CHECK));
 }
 
 // Function to create the tray
@@ -300,15 +303,26 @@ function createTray(win) {
   });
 
   // Update the menu labels every second
-  setInterval(() => {
+  intervals.push(setInterval(() => {
     updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
-  }, INTERVALS.MENU_UPDATE);
+  }, INTERVALS.MENU_UPDATE));
 
   // Run the monitorConnection function to check if steamchat is still connected
   monitorConnection(win);
 }
 
+// Add cleanup function
+function cleanupTray() {
+  intervals.forEach(id => clearInterval(id));
+  intervals.length = 0;
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+}
+
 // Export the functions for use in other modules
 module.exports = {
-  createTray
+  createTray,
+  cleanupTray,
 };
