@@ -3,7 +3,7 @@ const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 
 // Import constants
-const { STEAM_CHAT_URL } = require("./constants.js");
+const { STEAM_CHAT_URL, INTERVALS } = require("./constants.js");
 
 // Import the config object
 const config = require("./config.js");
@@ -31,6 +31,20 @@ function createBrowserWindow() {
 
   // Load the initial URL
   win.loadURL(STEAM_CHAT_URL);
+
+  // Handle page load failures
+  win.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    // Ignore certain error codes (like aborted loads)
+    if (errorCode === -3) return; // ERR_ABORTED
+    
+    console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+    
+    // Retry loading after a delay
+    setTimeout(() => {
+      console.log('Retrying to load Steam Chat...');
+      win.loadURL(STEAM_CHAT_URL);
+    }, INTERVALS.RELOAD_RETRY);
+  });
 
   // When the window is ready, disable next-page and previous-page mouse buttons
   win.webContents.on('dom-ready', () => {

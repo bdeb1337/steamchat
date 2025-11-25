@@ -16,6 +16,7 @@ const INTERVALS = {
   MENU_UPDATE: 1000,      // How often to check for status changes in menu
   CONNECTION_CHECK: 5000, // How often to verify Steam connection is alive
   TOOLTIP_UPDATE: 10000,  // How often to update tray tooltip with persona name
+  RELOAD_RETRY: 5000,     // How long to wait before retrying failed page loads
 };
 
 // Steam chat web application URL

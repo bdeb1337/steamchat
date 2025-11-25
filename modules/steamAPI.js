@@ -28,14 +28,19 @@ const SteamAPI = {
       // First check if Steam API is available
       const healthCheck = await win.webContents.executeJavaScript(this._healthCheck());
       if (healthCheck !== true) {
-        console.error('Steam API health check failed:', healthCheck);
+        // Silently fail - only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Steam API health check failed:', healthCheck);
+        }
         return null;
       }
       
       // Execute the actual code
       return await win.webContents.executeJavaScript(jsCode);
     } catch (error) {
-      console.error('Failed to execute Steam API call:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to execute Steam API call:', error);
+      }
       return null;
     }
   },
