@@ -78,7 +78,7 @@ app.on("before-quit", () => {
   cleanupTray();
 });
 
-// When a notification is clicked, show the window
+// When a notification is clicked, show and focus the window
 ipcMain.on('notification-click', () => {
   showWindow(win);
 });

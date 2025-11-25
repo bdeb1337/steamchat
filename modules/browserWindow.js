@@ -153,10 +153,13 @@ function hideWindow(win) {
   setDockVisibility(false);
 }
 
-// Function to show the window and the dock (Mac only)
+// Function to show and focus the window and to show the dock (Mac only)
 function showWindow(win) {
-  win.show();
   setDockVisibility(true);
+  // Bring app and window to foreground
+  win.show();
+  app.focus({ steal: true });
+  win.focus();
 }
 
 // Function to handle window events
