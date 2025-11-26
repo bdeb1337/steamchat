@@ -40,8 +40,8 @@ You can download the latest version of steamchat from the [releases](https://git
 #### Homebrew
 
 ```shell
-brew tap bdeb1337/bdeb1337
-brew install --cask steamchat
+brew tap bdeb1337/tap
+brew install --cask bdeb1337/steamchat
 ```
 
 Since code signing is not yet implemented but needed for notifications/audio you will need to self-sign the app:
