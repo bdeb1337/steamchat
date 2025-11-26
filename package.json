@@ -47,14 +47,14 @@
           "target": "nsis",
           "arch": [
             "x64",
-            "ia32"
+            "arm64"
           ]
         },
         {
           "target": "portable",
           "arch": [
             "x64",
-            "ia32"
+            "arm64"
           ]
         }
       ]
@@ -67,10 +67,34 @@
       "icon": "assets/app/icon.png",
       "category": "Network;Chat;",
       "target": [
-        "AppImage",
-        "deb",
-        "rpm",
-        "pacman"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "pacman",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ]
     }
   },
