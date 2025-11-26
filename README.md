@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/icon.png" alt="steamchat" width="25%">
+  <img src="./assets/app/icon.png" alt="steamchat" width="25%">
 </p>
 
 <div align="center">
