@@ -27,6 +27,7 @@ Steamchat is an electron web wrapper for **Steam Chat** (https://steamcommunity.
 - **Update status**: You can update your status directly from the tray menu.
 - **Simplified navigation**: Some navigation from the steamcommunity has been replaced, leaving only a **STEAM header logo** that returns you to the main chat dialog.
 - **Automatic reconnection**: steamchat will automatically reconnect if you lose your connection.
+- **Basic tray icon information**: steamchat's tray icon is shown more transparant if you have the invisible status active and shows a little star when you have unread messages.
 
 ## installation
 

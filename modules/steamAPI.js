@@ -10,6 +10,7 @@ const SteamAPI = {
   _healthCheck: () => `
     (function() {
       if (!window.g_FriendsUIApp) return 'g_FriendsUIApp missing';
+      if (!window.g_FriendsUIApp.ChatStore) return 'ChatStore missing';
       if (!window.g_FriendsUIApp.FriendStore) return 'FriendStore missing';
       if (!window.g_FriendsUIApp.m_UserStore) return 'UserStore missing';
       if (!window.g_FriendsUIApp.m_CMInterface) return 'CMInterface missing';
@@ -46,6 +47,9 @@ const SteamAPI = {
   },
 
   // API method strings
+  getUnreadFriendMessageCount: () => 
+    `g_FriendsUIApp.ChatStore.FriendChatStore.GetUnreadFriendMessageCount();`,
+  
   setPersonaState: (statusCode) => 
     `g_FriendsUIApp.FriendStore.SetUserPersonaState(${statusCode});`,
   
@@ -54,7 +58,7 @@ const SteamAPI = {
   
   getPersonaName: () => 
     `g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;`,
-  
+
   isConnected: () => 
     `g_FriendsUIApp.m_CMInterface.m_bConnected;`,
 };

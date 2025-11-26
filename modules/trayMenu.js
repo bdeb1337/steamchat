@@ -252,17 +252,49 @@ function monitorConnection(win) {
   }, INTERVALS.CONNECTION_CHECK));
 }
 
+// Function to get the appropriate tray icon based on status and unread messages
+function getTrayIconPath(status, hasUnread) {
+  const statusPrefix = status === PERSONA_STATE.INVISIBLE ? "invisible" : "online";
+  const unreadSuffix = hasUnread ? "-unread" : "";
+  const platformSuffix = isMac ? "-macTemplate@2x.png" : "-common.png";
+  
+  const iconName = `${statusPrefix}${unreadSuffix}${platformSuffix}`;
+  
+  return path.join(__dirname, "..", "assets", "tray", iconName);
+}
+
+// Function to update the tray icon
+async function updateTrayIcon(win, tray) {
+  if (!isOnChatPage(win)) {
+    return;
+  }
+  
+  try {
+    // Get current status
+    const status = await SteamAPI.execute(win, SteamAPI.getPersonaState());
+    
+    // Get unread message count
+    const unreadCount = await SteamAPI.execute(win, SteamAPI.getUnreadFriendMessageCount());
+    
+    if (status === null || unreadCount === null) {
+      return;
+    }
+    
+    // Update tray icon based on status and unread messages
+    const hasUnread = unreadCount > 0;
+    const iconPath = getTrayIconPath(status, hasUnread);
+    
+    tray.setImage(iconPath);
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to update tray icon:', error);
+    }
+  }
+}
+
 // Function to create the tray
 function createTray(win) {
-  tray = new Tray(
-    path.join(
-      __dirname,
-      "..",
-      "assets",
-      "tray",
-      isMac ? "macTemplate@2x.png" : "common.png"
-    )
-  );
+  tray = new Tray(getTrayIconPath(PERSONA_STATE.ONLINE, false)); // Initial icon
 
   const { contextMenu, menuItems } = createContextMenu(win, tray);
   tray.setContextMenu(contextMenu);
@@ -278,6 +310,11 @@ function createTray(win) {
   intervals.push(setInterval(() => {
     updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
   }, INTERVALS.MENU_UPDATE));
+
+  // Update tray icon based on status and unread messages
+  intervals.push(setInterval(() => {
+    updateTrayIcon(win, tray);
+  }, INTERVALS.MENU_UPDATE)); // Use same interval as menu updates
 
   // Run the monitorConnection function to check if steamchat is still connected
   monitorConnection(win);
