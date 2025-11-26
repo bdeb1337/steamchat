@@ -3,6 +3,10 @@ const { app, Menu, Tray } = require("electron");
 const os = require("os");
 const path = require("path");
 
+// Import own modules and constants
+const SteamAPI = require("./steamAPI.js");
+const { PERSONA_STATE, INTERVALS, STEAM_CHAT_URL } = require("./constants.js");
+
 // Check if the platform is macOS
 const isMac = process.platform === "darwin";
 
@@ -11,6 +15,9 @@ const { toggleWindow } = require("./browserWindow.js");
 
 // Import the config object
 const config = require("./config.js");
+
+// Create a variable to hold intervals
+const intervals = [];
 
 // Create a variable to hold the tray object
 let tray = null;
@@ -41,9 +48,9 @@ function initMenuItems(win, tray) {
     createSubmenu(win, "Settings", settingsItems),
     { type: "separator" },
     { label: "Status", enabled: false },
-    statusMenuItem(win, "Online"),
-    statusMenuItem(win, "Away"),
-    statusMenuItem(win, "Invisible"),
+    statusMenuItem(win, "Online", PERSONA_STATE.ONLINE),
+    statusMenuItem(win, "Away", PERSONA_STATE.AWAY),
+    statusMenuItem(win, "Invisible", PERSONA_STATE.INVISIBLE),
     { type: "separator" },
     quitMenuItem(),
   ];
@@ -61,36 +68,35 @@ function toggleWindowMenuItem(win) {
 
 // Map of status codes to status labels
 const statusMap = {
-  1: "Online",
-  3: "Away",
-  7: "Invisible",
+  [PERSONA_STATE.ONLINE]: "Online",
+  [PERSONA_STATE.AWAY]: "Away",
+  [PERSONA_STATE.INVISIBLE]: "Invisible",
 };
 
 // Function to create a menu item that sets the user status
-function statusMenuItem(win, status) {
+function statusMenuItem(win, statusLabel, statusCode) {
   return {
-    label: status,
-    click: function () {
-      // Execute JavaScript in the window to set the user status
-      win.webContents.executeJavaScript(
-        `this.GetCurrentUserStatusInterface().SetUser${status}();`
-      );
+    label: statusLabel,
+    click: async function () {
+      await SteamAPI.execute(win, SteamAPI.setPersonaState(statusCode));
     },
   };
 }
 
 let currentStatus = null; // Variable to hold the current status
 
+// Function to check if the window is on the Steam chat page
+function isOnChatPage(win) {
+  return win && !win.isDestroyed() && win.webContents.getURL() === STEAM_CHAT_URL;
+}
+
 // Function to get the new status
 async function getNewStatus(win) {
-  // If the window URL is not the chat URL, return null
-  if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+  if (!isOnChatPage(win)) {
     return null;
   }
-  // Execute JavaScript in the window to get the user status
-  return await win.webContents.executeJavaScript(
-    `this.GetCurrentUserStatusInterface().GetPersonaState();`
-  );
+  
+  return await SteamAPI.execute(win, SteamAPI.getPersonaState());
 }
 
 // Function to update the status labels in the menu items
@@ -126,11 +132,13 @@ async function updateMenuLabels(win) {
 function clearLocalStorageMenuItem(win) {
   return {
     label: "Clear Local Storage",
-    click: function () {
-      // Clear the storage data and then reload the window
-      win.webContents.session.clearStorageData().then(() => {
+    click: async function () {
+      try {
+        await win.webContents.session.clearStorageData();
         win.reload();
-      });
+      } catch (error) {
+        console.error("Failed to clear local storage:", error);
+      }
     },
   };
 }
@@ -211,64 +219,82 @@ let lastTooltip = ""; // Variable to hold the last tooltip
 
 // Function to handle the tray tooltip
 function handleTrayTooltip(win, tray) {
-  setInterval(() => {
-    // Exit the function if URL is not 'https://steamcommunity.com/chat'
-    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+  intervals.push(setInterval(async () => {
+    if (!isOnChatPage(win)) {
       return;
     }
-    win.webContents
-      .executeJavaScript(
-        "this.g_FriendsUIApp.m_UserStore.m_CMInterface.persona_name;"
-      )
-      .then((persona_name) => {
-        const newTooltip = persona_name
-          ? `${persona_name} - steamchat`
-          : "steamchat";
-        if (newTooltip !== lastTooltip) {
-          tray.setToolTip(newTooltip);
-          lastTooltip = newTooltip;
-        }
-      })
-      .catch((error) => {
-        console.error("An error occurred:", error);
-      });
-  }, 10000);
+    
+    const persona_name = await SteamAPI.execute(win, SteamAPI.getPersonaName());
+    
+    const newTooltip = persona_name
+      ? `${persona_name} - steamchat`
+      : "steamchat";
+    if (newTooltip !== lastTooltip) {
+      tray.setToolTip(newTooltip);
+      lastTooltip = newTooltip;
+    }
+  }, INTERVALS.TOOLTIP_UPDATE));
 }
 
 // Function to monitor if steamchat is still connected
 function monitorConnection(win) {
-  setInterval(() => {
-    // Exit the function if URL is not 'https://steamcommunity.com/chat'
-    if (win.webContents.getURL() !== "https://steamcommunity.com/chat") {
+  intervals.push(setInterval(async () => {
+    if (!isOnChatPage(win)) {
       return;
     }
-    win.webContents
-    .executeJavaScript(`
-      var output = this.g_FriendsUIApp.m_CMInterface.m_bConnected;
-      if (!output) {
-        console.log("Disconnected from Steam Chat. Reloading...");
-        window.location.reload();
-      }
-      output;
-    `)
-    .catch((error) => {
-      console.error("An error occurred:", error);
-      console.log("Reloading...");
-      win.webContents.reload();
-    });
-  }, 5000);
+    
+    const isConnected = await SteamAPI.execute(win, SteamAPI.isConnected());
+    
+    if (isConnected === false) {
+      console.log("Disconnected from Steam Chat. Reloading...");
+      win.webContents.loadURL(STEAM_CHAT_URL);
+    }
+  }, INTERVALS.CONNECTION_CHECK));
+}
+
+// Function to get the appropriate tray icon based on status and unread messages
+function getTrayIconPath(status, hasUnread) {
+  const statusPrefix = status === PERSONA_STATE.INVISIBLE ? "invisible" : "online";
+  const unreadSuffix = hasUnread ? "-unread" : "";
+  const platformSuffix = isMac ? "-macTemplate@2x.png" : "-common.png";
+  
+  const iconName = `${statusPrefix}${unreadSuffix}${platformSuffix}`;
+  
+  return path.join(__dirname, "..", "assets", "tray", iconName);
+}
+
+// Function to update the tray icon
+async function updateTrayIcon(win, tray) {
+  if (!isOnChatPage(win)) {
+    return;
+  }
+  
+  try {
+    // Get current status
+    const status = await SteamAPI.execute(win, SteamAPI.getPersonaState());
+    
+    // Get unread message count
+    const unreadCount = await SteamAPI.execute(win, SteamAPI.getUnreadFriendMessageCount());
+    
+    if (status === null || unreadCount === null) {
+      return;
+    }
+    
+    // Update tray icon based on status and unread messages
+    const hasUnread = unreadCount > 0;
+    const iconPath = getTrayIconPath(status, hasUnread);
+    
+    tray.setImage(iconPath);
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to update tray icon:', error);
+    }
+  }
 }
 
 // Function to create the tray
 function createTray(win) {
-  tray = new Tray(
-    path.join(
-      __dirname,
-      "..",
-      "assets",
-      isMac ? "macTrayIcon@2x.png" : "trayIcon.png"
-    )
-  );
+  tray = new Tray(getTrayIconPath(PERSONA_STATE.ONLINE, false)); // Initial icon
 
   const { contextMenu, menuItems } = createContextMenu(win, tray);
   tray.setContextMenu(contextMenu);
@@ -281,15 +307,31 @@ function createTray(win) {
   });
 
   // Update the menu labels every second
-  setInterval(() => {
+  intervals.push(setInterval(() => {
     updateMenuLabels(win, [...menuItems]); // Pass a copy of menuItems to avoid mutation
-  }, 1000);
+  }, INTERVALS.MENU_UPDATE));
+
+  // Update tray icon based on status and unread messages
+  intervals.push(setInterval(() => {
+    updateTrayIcon(win, tray);
+  }, INTERVALS.MENU_UPDATE)); // Use same interval as menu updates
 
   // Run the monitorConnection function to check if steamchat is still connected
   monitorConnection(win);
 }
 
+// Add cleanup function
+function cleanupTray() {
+  intervals.forEach(id => clearInterval(id));
+  intervals.length = 0;
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
+}
+
 // Export the functions for use in other modules
 module.exports = {
-  createTray
+  createTray,
+  cleanupTray,
 };

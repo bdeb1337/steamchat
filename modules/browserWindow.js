@@ -2,6 +2,9 @@
 const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 
+// Import constants
+const { STEAM_CHAT_URL, INTERVALS } = require("./constants.js");
+
 // Import the config object
 const config = require("./config.js");
 
@@ -27,7 +30,21 @@ function createBrowserWindow() {
   });
 
   // Load the initial URL
-  win.loadURL("https://steamcommunity.com/chat");
+  win.loadURL(STEAM_CHAT_URL);
+
+  // Handle page load failures
+  win.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    // Ignore certain error codes (like aborted loads)
+    if (errorCode === -3) return; // ERR_ABORTED
+    
+    console.error(`Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+    
+    // Retry loading after a delay
+    setTimeout(() => {
+      console.log('Retrying to load Steam Chat...');
+      win.loadURL(STEAM_CHAT_URL);
+    }, INTERVALS.RELOAD_RETRY);
+  });
 
   // When the window is ready, disable next-page and previous-page mouse buttons
   win.webContents.on('dom-ready', () => {
@@ -35,33 +52,62 @@ function createBrowserWindow() {
   });
 
   // Control link navigation
-  controlLinkNavigation(win, true);
+  controlLinkNavigation(win);
 
   return win;
 }
 
-// Function to control link navigation
-function controlLinkNavigation(win, shouldOpenExternally) {
-  if (shouldOpenExternally) {
-    // Open external links in the default browser
-    win.webContents.on('dom-ready', () => {
-      win.webContents.executeJavaScript(`
-        const originalOpen = window.open;
-        window.open = (url) => {
-          if (url.includes('steampowered.com') || url.includes('steamcommunity.com')) {
-            // Open steampowered.com and steamcommunity.com URLs internally
-            originalOpen(url, '_self');
-            return true;
-          } else {
-            // Open other URLs externally
-            electron.openExternal(url);
-            return false;
-          }
-        };
-        null;
-        `).catch(error => console.error('Error executing JavaScript:', error));
-    });
+// Helper function to check if URL is a Steam domain
+function isSteamDomain(url) {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname.endsWith('steamcommunity.com') || 
+           parsedUrl.hostname.endsWith('steampowered.com');
+  } catch {
+    return false;
   }
+}
+
+// Helper function to extract URL from Steam's linkfilter
+function extractLinkFilterUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    
+    // Check if it's a linkfilter URL
+    if (parsedUrl.pathname === '/linkfilter/' || parsedUrl.pathname === '/linkfilter') {
+      // Extract the 'u' parameter which contains the actual URL
+      const actualUrl = parsedUrl.searchParams.get('u');
+      if (actualUrl) {
+        return decodeURIComponent(actualUrl);
+      }
+    }
+  } catch {
+    return null;
+  }
+  
+  return null;
+}
+
+// Function to control link navigation
+function controlLinkNavigation(win) {
+  const { shell } = require('electron');
+
+  // Handle links clicked within the page (including redirects)
+  win.webContents.on('will-navigate', (event, url) => {
+    // Check if it's a linkfilter URL
+    const actualUrl = extractLinkFilterUrl(url);
+    if (actualUrl) {
+      event.preventDefault();
+      shell.openExternal(actualUrl);
+      return;
+    }
+    
+    // If navigating away from Steam chat to external site
+    if (!isSteamDomain(url) && win.webContents.getURL() === STEAM_CHAT_URL) {
+      event.preventDefault();
+      shell.openExternal(url);
+    }
+  });
 }
 
 // Function to disable mouse navigation
@@ -107,17 +153,36 @@ function hideWindow(win) {
   setDockVisibility(false);
 }
 
-// Function to show the window and the dock (Mac only)
+// Function to show and focus the window and to show the dock (Mac only)
 function showWindow(win) {
-  win.show();
   setDockVisibility(true);
+  // Bring app and window to foreground
+  win.show();
+  app.focus({ steal: true });
+  win.focus();
 }
 
 // Function to handle window events
 function handleWindowEvents(win) {
-  // Prevent new windows from being opened and redirect the navigation to the current window
+  const { shell } = require('electron');
+
+  // Handle new windows (window.open, target="_blank", etc.)
   win.webContents.setWindowOpenHandler(({ url }) => {
-    win.loadURL(url);
+    // Check if it's a linkfilter URL
+    const actualUrl = extractLinkFilterUrl(url);
+    if (actualUrl) {
+      shell.openExternal(actualUrl);
+      return { action: "deny" };
+    }
+  
+    // If it's a Steam domain, open in the same window
+    if (isSteamDomain(url)) {
+      win.loadURL(url);
+      return { action: "deny" };
+    }
+
+    // Otherwise open externally
+    shell.openExternal(url);
     return { action: "deny" };
   });
 
@@ -126,7 +191,7 @@ function handleWindowEvents(win) {
     if (!app.isQuiting && config.get("minimize_on_close")) {
       event.preventDefault();
       hideWindow(win);
-    }else{
+    } else {
       app.quit();
     }
     return false;

@@ -12,6 +12,7 @@ const {
 
 const {
   createTray,
+  cleanupTray,
 } = require("./modules/trayMenu.js");
 
 // Import the config object
@@ -74,17 +75,10 @@ app.on("before-quit", () => {
   // Set app.isQuiting to true
   app.isQuiting = true;
   // Destroy the tray icon
-  if (tray){
-    tray.destroy();
-  }
+  cleanupTray();
 });
 
-// When a notification is clicked, show the window
+// When a notification is clicked, show and focus the window
 ipcMain.on('notification-click', () => {
   showWindow(win);
-});
-
-// When an open-external event is received, open the URL in the default browser
-ipcMain.on('open-external', (event, url) => {
-  shell.openExternal(url);
 });

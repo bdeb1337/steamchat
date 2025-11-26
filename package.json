@@ -1,6 +1,6 @@
 {
   "name": "steamchat",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "a webwrapper for steam chat",
   "author": {
     "name": "bdeb1337",
@@ -14,16 +14,20 @@
   "license": "ISC",
   "main": "main.js",
   "scripts": {
-    "start": "NODE_ENV=development electron .",
+    "start": "NODE_ENV=development electron . --trace-warnings",
+    "dev": "NODE_ENV=development electron . --trace-warnings",
+    "start:clean": "rm -rf ~/Library/Application\\ Support/steamchat && npm start",
     "build": "NODE_ENV=production electron-builder",
     "build:mac": "NODE_ENV=production electron-builder --mac",
     "build:win": "set NODE_ENV=production&& electron-builder --win",
-    "build:linux": "NODE_ENV=production electron-builder --linux"
+    "build:linux": "NODE_ENV=production electron-builder --linux",
+    "clean": "rm -rf dist build",
+    "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
     "mac": {
-      "icon": "assets/icon.icns",
+      "icon": "assets/app/icon.icns",
       "extendInfo": {
         "NSMicrophoneUsageDescription": "Mic access is required for notification sounds.",
         "com.apple.security.device.microphone": true
@@ -37,20 +41,20 @@
       ]
     },
     "win": {
-      "icon": "assets/icon.ico",
+      "icon": "assets/app/icon.ico",
       "target": [
         {
           "target": "nsis",
           "arch": [
             "x64",
-            "ia32"
+            "arm64"
           ]
         },
         {
           "target": "portable",
           "arch": [
             "x64",
-            "ia32"
+            "arm64"
           ]
         }
       ]
@@ -60,22 +64,46 @@
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
-      "icon": "assets/icons",
+      "icon": "assets/app/icon.png",
       "category": "Network;Chat;",
       "target": [
-        "AppImage",
-        "deb",
-        "rpm",
-        "pacman"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "pacman",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ]
     }
   },
   "devDependencies": {
-    "electron": "^29.0.1",
-    "electron-builder": "^24.13.3"
+    "electron": "^39.2.3",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "auto-launch": "^5.0.6",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.1"
   }
 }
