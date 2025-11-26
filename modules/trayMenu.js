@@ -260,7 +260,7 @@ function createTray(win) {
       "..",
       "assets",
       "tray",
-      isMac ? "mac@2x.png" : "common.png"
+      isMac ? "macTemplate@2x.png" : "common.png"
     )
   );
 
