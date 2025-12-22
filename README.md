@@ -41,7 +41,7 @@ You can download the latest version of steamchat from the [releases](https://git
 
 ```shell
 brew tap bdeb1337/tap
-brew install --cask bdeb1337/steamchat
+brew install --cask bdeb1337/tap/steamchat
 ```
 
 ### Windows
