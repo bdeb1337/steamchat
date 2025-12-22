@@ -260,7 +260,12 @@ function getTrayIconPath(status, hasUnread) {
   
   const iconName = `${statusPrefix}${unreadSuffix}${platformSuffix}`;
   
-  return path.join(__dirname, "..", "assets", "tray", iconName);
+  // In production, assets are in the resources folder
+  const assetsPath = app.isPackaged
+    ? path.join(process.resourcesPath, "assets", "tray")
+    : path.join(__dirname, "..", "assets", "tray");
+  
+  return path.join(assetsPath, iconName);
 }
 
 // Function to update the tray icon

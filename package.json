@@ -26,6 +26,17 @@
   },
   "build": {
     "appId": "com.bdeb1337.steamchat",
+    "files": [
+      "**/*",
+      "assets/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": ["**/*"]
+      }
+    ],
     "mac": {
       "icon": "assets/app/icon.icns",
       "extendInfo": {
