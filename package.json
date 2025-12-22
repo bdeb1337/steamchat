@@ -39,6 +39,9 @@
     ],
     "mac": {
       "icon": "assets/app/icon.icns",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "extendInfo": {
         "NSMicrophoneUsageDescription": "Mic access is required for notification sounds.",
         "com.apple.security.device.microphone": true

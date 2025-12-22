@@ -9,27 +9,6 @@ env:
   NODE_VERSION: 25
 
 jobs:
-  release_mac:
-    runs-on: macos-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-        with:
-          ref: main
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build app
-        run: npm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   release_win:
     runs-on: windows-latest
     steps:
