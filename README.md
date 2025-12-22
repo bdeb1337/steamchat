@@ -42,16 +42,6 @@ You can download the latest version of steamchat from the [releases](https://git
 ```shell
 brew tap bdeb1337/tap
 brew install --cask bdeb1337/steamchat
-xattr -cr /Applications/steamchat.app
-```
-
-If you have issues with notification permissions, code signing might be needed for notifications/audio and you will need to self-sign the app:
-
-```shell
-# generate a self-signed certificate cref. 
-# https://www.simplified.guide/macos/keychain-cert-code-signing-create 
-# and https://support.apple.com/guide/keychain-access/create-self-signed-certificates-kyca8916/mac
-codesign --deep --force --verify --verbose --sign "Your Certificate" /Applications/steamchat.app
 ```
 
 ### Windows
