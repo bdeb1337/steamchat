@@ -113,8 +113,8 @@
     }
   },
   "devDependencies": {
-    "electron": "^39.2.7",
-    "electron-builder": "^26.0.12"
+    "electron": "^39.3.0",
+    "electron-builder": "^26.4.0"
   },
   "dependencies": {
     "auto-launch": "^5.0.6",
