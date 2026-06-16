@@ -21,6 +21,7 @@
     "build:mac": "NODE_ENV=production electron-builder --mac",
     "build:win": "set NODE_ENV=production&& electron-builder --win",
     "build:linux": "NODE_ENV=production electron-builder --linux",
+    "lint": "node --check main.js && node --check modules/browserWindow.js && node --check modules/config.js && node --check modules/constants.js && node --check modules/preload.js && node --check modules/steamAPI.js && node --check modules/trayMenu.js",
     "clean": "rm -rf dist build",
     "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },

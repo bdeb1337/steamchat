@@ -2,28 +2,43 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
   contents: write
-
-env:
-  NODE_VERSION: 25
+  issues: write
+  pull-requests: write
 
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          release-type: node
+          include-component-in-tag: false
+
   release_win:
+    needs: release
+    if: ${{ needs.release.outputs.release_created == 'true' }}
     runs-on: windows-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ needs.release.outputs.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 25
 
       - name: Install dependencies
         run: npm ci
@@ -33,18 +48,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: steamchat-windows
+          path: dist/**
+          if-no-files-found: error
+
   release_linux:
+    needs: release
+    if: ${{ needs.release.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ needs.release.outputs.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 25
 
       - name: Install npm dependencies
         run: npm ci
@@ -58,3 +82,35 @@ jobs:
         run: npm run build:linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: steamchat-linux
+          path: dist/**
+          if-no-files-found: error
+
+  publish_release:
+    needs:
+      - release
+      - release_win
+      - release_linux
+    if: ${{ needs.release.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: steamchat-windows
+          path: artifacts/windows
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: steamchat-linux
+          path: artifacts/linux
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: find artifacts/windows artifacts/linux -type f -print0 | xargs -0 -r gh release upload "${{ needs.release.outputs.tag_name }}" --clobber
