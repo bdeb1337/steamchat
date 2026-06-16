@@ -2,6 +2,13 @@
 
 All notable changes to this project are listed here.
 
+## [0.2.2](https://github.com/bdeb1337/steamchat/compare/v0.2.1...v0.2.2) (2026-06-16)
+
+
+### Bug Fixes
+
+* **deps:** bump electron and runtime dependencies ([3ebd314](https://github.com/bdeb1337/steamchat/commit/3ebd314a26085b709c9d7ed4754e5122afc281a3))
+
 ## [0.2.1] - 2025-12-22
 - Updated dependencies.
 - Fixed tray icons so status is represented correctly.
@@ -34,4 +41,3 @@ All notable changes to this project are listed here.
 - Improved tray behavior and shutdown handling.
 - Added auto-launch support and other stability fixes.
 - Updated Electron and dependency packaging.
-
