@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   sanity:
     runs-on: ubuntu-latest
@@ -27,4 +30,3 @@ jobs:
 
       - name: Build unpacked app
         run: npm run build -- --dir
-
