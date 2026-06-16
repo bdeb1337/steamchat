@@ -114,11 +114,11 @@
     }
   },
   "devDependencies": {
-    "electron": "^39.3.0",
-    "electron-builder": "^26.4.0"
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3"
   },
   "dependencies": {
     "auto-launch": "^5.0.6",
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.2.0"
   }
 }
