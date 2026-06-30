@@ -2,6 +2,13 @@
 
 All notable changes to this project are listed here.
 
+## [0.2.3](https://github.com/bdeb1337/steamchat/compare/v0.2.2...v0.2.3) (2026-06-30)
+
+
+### Bug Fixes
+
+* **deps:** bump electron to v43 and js-yaml to v5 ([f75e3fc](https://github.com/bdeb1337/steamchat/commit/f75e3fc9a59a5781663bd54170fa37b267e8b5ee))
+
 ## [0.2.2](https://github.com/bdeb1337/steamchat/compare/v0.2.1...v0.2.2) (2026-06-16)
 
 
