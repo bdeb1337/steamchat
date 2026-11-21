@@ -5,6 +5,16 @@ const path = require("path");
 // Import constants
 const { STEAM_CHAT_URL, INTERVALS } = require("./constants.js");
 
+// Import URL policy helpers
+const {
+  isSteamDomain,
+  isAllowedExternalUrl,
+  extractLinkFilterUrl,
+} = require("./urlPolicy.js");
+
+// Import path helpers
+const { browserWindowIcon } = require("./appPaths.js");
+
 // Import the config object
 const config = require("./config.js");
 
@@ -24,7 +34,7 @@ function createBrowserWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
-    icon: path.join(__dirname, "assets", "icon.png"),
+    icon: browserWindowIcon(__dirname),
     show: !config.get("start_minimized"), // Show the window if start_minimized is false
     webPreferences: setWebPreferences(), // Set the web preferences
   });
@@ -57,37 +67,6 @@ function createBrowserWindow() {
   return win;
 }
 
-// Helper function to check if URL is a Steam domain
-function isSteamDomain(url) {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.hostname.endsWith('steamcommunity.com') || 
-           parsedUrl.hostname.endsWith('steampowered.com');
-  } catch {
-    return false;
-  }
-}
-
-// Helper function to extract URL from Steam's linkfilter
-function extractLinkFilterUrl(url) {
-  try {
-    const parsedUrl = new URL(url);
-    
-    // Check if it's a linkfilter URL
-    if (parsedUrl.pathname === '/linkfilter/' || parsedUrl.pathname === '/linkfilter') {
-      // Extract the 'u' parameter which contains the actual URL
-      const actualUrl = parsedUrl.searchParams.get('u');
-      if (actualUrl) {
-        return decodeURIComponent(actualUrl);
-      }
-    }
-  } catch {
-    return null;
-  }
-  
-  return null;
-}
-
 // Function to control link navigation
 function controlLinkNavigation(win) {
   const { shell } = require('electron');
@@ -105,7 +84,10 @@ function controlLinkNavigation(win) {
     // If navigating away from Steam chat to external site
     if (!isSteamDomain(url) && win.webContents.getURL() === STEAM_CHAT_URL) {
       event.preventDefault();
-      shell.openExternal(url);
+      // Only hand safe web URLs to the operating system
+      if (isAllowedExternalUrl(url)) {
+        shell.openExternal(url);
+      }
     }
   });
 }
@@ -181,8 +163,10 @@ function handleWindowEvents(win) {
       return { action: "deny" };
     }
 
-    // Otherwise open externally
-    shell.openExternal(url);
+    // Otherwise open externally, but only safe web URLs
+    if (isAllowedExternalUrl(url)) {
+      shell.openExternal(url);
+    }
     return { action: "deny" };
   });
 

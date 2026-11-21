@@ -7,19 +7,8 @@ contextBridge.exposeInMainWorld('electron', {
   }
 });
 
-// Add an event listener for the DOMContentLoaded event
-window.addEventListener("DOMContentLoaded", () => {
-  // Function to replace the text of an element
-  const replaceText = (selector, text) => {
-    const element = document.getElementById(selector);
-    if (element) element.innerText = text;
-  };
-
-  // Replace the text of the version elements
-  for (const type of ["chrome", "node", "electron"]) {
-    replaceText(`${type}-version`, process.versions[type]);
-  }
-
+// Remove Steam Community chrome from the Steam Chat page
+function cleanupSteamChrome() {
   // Function to remove an element
   function removeElement(selector) {
     const element = document.querySelector(selector);
@@ -37,39 +26,57 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Function to handle a mutation
-  function handleMutation(mutation) {
-    if (mutation.type === "childList") {
-      // Remove the Steam Chat header
-      removeElement(`div[class="main_SteamPageHeader_3NLSM"]`);
+  // Remove the Steam Chat header
+  removeElement(`div.main_SteamPageHeader_3NLSM`);
 
-      // Remove the Steam Community navigation bar
-      // and replace with a link to the Steam Chat
-      const idRemoveList = [
-        "responsive_menu_logo",
-        "store_controls",
-        "store_nav_area",
-        "global_actions"
-      ];
-      idRemoveList.forEach(id => removeElement(`div[id="${id}"]`));
+  // Remove the Steam Community navigation bar
+  // and replace with a link to the Steam Chat
+  const idRemoveList = [
+    "responsive_menu_logo",
+    "store_controls",
+    "store_nav_area",
+    "global_actions"
+  ];
+  idRemoveList.forEach(id => removeElement(`div[id="${id}"]`));
 
-      // Remove the non-responsive Steam Community navigation bar
-      const classRemoveList = ["supernav_container"];
-      classRemoveList.forEach(className => removeElement(`div[class="${className}"]`));
+  // Remove the non-responsive Steam Community navigation bar
+  const classRemoveList = ["supernav_container"];
+  classRemoveList.forEach(className => removeElement(`div[class="${className}"]`));
 
-      // Replace the href in the logo
-      replaceLogoHref(`div[class="logo"]`);
-      replaceLogoHref(".responsive_header_logo");
-    }
+  // Replace the href in the logo
+  replaceLogoHref(`div[class="logo"]`);
+  replaceLogoHref(".responsive_header_logo");
+}
+
+// Add an event listener for the DOMContentLoaded event
+window.addEventListener("DOMContentLoaded", () => {
+  // Function to replace the text of an element
+  const replaceText = (selector, text) => {
+    const element = document.getElementById(selector);
+    if (element) element.innerText = text;
+  };
+
+  // Replace the text of the version elements
+  for (const type of ["chrome", "node", "electron"]) {
+    replaceText(`${type}-version`, process.versions[type]);
   }
 
-  // Function to handle multiple mutations
-  function handleMutations(mutations) {
-    mutations.forEach(handleMutation);
+  // Clean up the page once it has loaded
+  cleanupSteamChrome();
+
+  // Schedule a trailing cleanup for mutation bursts. A burst runs once,
+  // 200ms after the first mutation, instead of on every mutation.
+  let cleanupTimer = null;
+  function scheduleCleanup() {
+    if (cleanupTimer !== null) return;
+    cleanupTimer = setTimeout(() => {
+      cleanupTimer = null;
+      cleanupSteamChrome();
+    }, 200);
   }
 
   // Create a new MutationObserver
-  const observer = new MutationObserver(handleMutations);
+  const observer = new MutationObserver(scheduleCleanup);
 
   // Start observing the document with the configured parameters
   observer.observe(document, { childList: true, subtree: true });

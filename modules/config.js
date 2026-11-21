@@ -5,6 +5,9 @@ const yaml = require("js-yaml");
 const { app } = require("electron");
 const AutoLaunch = require('auto-launch');
 
+// Import configuration helpers
+const { mergeConfigDefaults } = require("./configDefaults.js");
+
 // Define the path to the config file
 const configPath = path.join(app.getPath("userData"), "steamchat.conf");
 
@@ -34,31 +37,27 @@ function configFileExists() {
 
 function loadExistingConfig() {
   try {
-    config = yaml.load(fs.readFileSync(configPath, "utf8"));
-    updateConfigWithMissingKeys();
+    const parsed = yaml.load(fs.readFileSync(configPath, "utf8"));
+
+    // Treat anything that is not a plain object as an invalid configuration
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      console.error("Config file does not contain a valid configuration object; restoring defaults.");
+      config = mergeConfigDefaults(null, defaultConfig);
+      writeConfigToFile();
+      return;
+    }
+
+    const missingKeys = Object.keys(defaultConfig).filter(
+      (key) => !Object.prototype.hasOwnProperty.call(parsed, key)
+    );
+    config = mergeConfigDefaults(parsed, defaultConfig);
+
+    if (missingKeys.length > 0) {
+      writeConfigToFile();
+    }
   } catch (e) {
     console.error(e);
   }
-}
-
-function updateConfigWithMissingKeys() {
-  const missingKeys = getMissingKeys();
-  if (missingKeys.length > 0) {
-    addMissingKeysToConfig(missingKeys);
-    writeConfigToFile();
-  }
-}
-
-function getMissingKeys() {
-  const configKeys = Object.keys(config);
-  const defaultKeys = Object.keys(defaultConfig);
-  return defaultKeys.filter((key) => !configKeys.includes(key));
-}
-
-function addMissingKeysToConfig(missingKeys) {
-  missingKeys.forEach((key) => {
-    config[key] = defaultConfig[key];
-  });
 }
 
 function writeConfigToFile() {
