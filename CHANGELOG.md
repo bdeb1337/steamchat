@@ -2,6 +2,15 @@
 
 All notable changes to this project are listed here.
 
+## [0.2.3](https://github.com/bdeb1337/steamchat/compare/v0.2.2...v0.2.3) (2026-11-21)
+
+
+### Bug Fixes
+
+* **deps:** bump deps ([52e31fd](https://github.com/bdeb1337/steamchat/commit/52e31fdc558e33f501f15dfaf06f79fbdbfab842))
+* **deps:** bump electron to v43 and js-yaml to v5 ([f75e3fc](https://github.com/bdeb1337/steamchat/commit/f75e3fc9a59a5781663bd54170fa37b267e8b5ee))
+* harden steam URL navigation and preload cleanup ([ec3948e](https://github.com/bdeb1337/steamchat/commit/ec3948e6f2f5a9f6f682fbbc99d2b700b60a0a93))
+
 ## [0.2.2](https://github.com/bdeb1337/steamchat/compare/v0.2.1...v0.2.2) (2026-06-16)
 
 
