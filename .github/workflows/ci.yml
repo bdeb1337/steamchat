@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   pull_request:
 
 permissions:
@@ -27,6 +28,9 @@ jobs:
 
       - name: Lint sources
         run: npm run lint
+
+      - name: Run unit tests
+        run: npm test
 
       - name: Build unpacked app
         run: npm run build -- --dir

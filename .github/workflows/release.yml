@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   release:
+    if: github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
@@ -27,7 +28,7 @@ jobs:
 
   release_win:
     needs: release
-    if: ${{ needs.release.outputs.release_created == 'true' }}
+    if: ${{ github.server_url == 'https://github.com' && needs.release.outputs.release_created == 'true' }}
     runs-on: windows-latest
     steps:
       - name: Check out code
@@ -57,7 +58,7 @@ jobs:
 
   release_linux:
     needs: release
-    if: ${{ needs.release.outputs.release_created == 'true' }}
+    if: ${{ github.server_url == 'https://github.com' && needs.release.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -95,7 +96,7 @@ jobs:
       - release
       - release_win
       - release_linux
-    if: ${{ needs.release.outputs.release_created == 'true' }}
+    if: ${{ github.server_url == 'https://github.com' && needs.release.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows artifacts
